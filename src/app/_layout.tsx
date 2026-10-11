@@ -1,15 +1,20 @@
-import { SplashScreen } from "@/components/ui/SplashScreen";
+import { SplashScreen as CashifySplashScreen } from "@/components/ui/SplashScreen";
 import { useSessionGuard } from "@/hooks/useSessionGuard";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
 import "../../global.css";
+
+// Tahan native splash screen agar tidak hilang otomatis
+SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 2,
-      staleTime: 1000 * 60 * 5,
-      gcTime: 1000 * 60 * 10,
+      staleTime: 1000 * 60 * 5, // 5 menit
+      gcTime: 1000 * 60 * 10, // 10 menit
     },
     mutations: {
       retry: 0,
@@ -18,13 +23,20 @@ const queryClient = new QueryClient({
 });
 
 function RootLayoutNav() {
-  // Guard dipisah ke komponen dalam agar bisa mengakses
-  // context dari QueryClientProvider dan expo-router
   const { isReady } = useSessionGuard();
 
-  // Tampilan splash screen selama guard mengecek session
+  useEffect(() => {
+    if (isReady) {
+      // Sembunyikan native splash screen setelah komponen kita siap ditampilkan
+      SplashScreen.hide();
+    }
+  }, [isReady]);
+
+  // Selama guard mengecek session, tampilkan komponen SplashScreen kita.
+  // Transisi dari native splash ke komponen ini tidak terlihat karena
+  // backgroundColor keduanya identik (#f8f9ff).
   if (!isReady) {
-    return <SplashScreen />;
+    return <CashifySplashScreen />;
   }
 
   return (

@@ -4,7 +4,7 @@
     "slug": "cashify",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/cashify-icon.png",
     "scheme": "cashify",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -29,12 +29,13 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "backgroundColor": "#f8f9ff",
+          "image": "./assets/images/logo-icon-cashify.png",
+          "imageWidth": 112
         }
       ],
-      "@react-native-vector-icons/ionicons"
+      "@react-native-vector-icons/ionicons",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

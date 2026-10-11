@@ -1,6 +1,7 @@
-import * as Keychain from "react-native-keychain";
+import * as SecureStore from "expo-secure-store";
 
-const TOKEN_KEY = "cashify_auth_token";
+const ACCESS_TOKEN_KEY = "cashify_access_token";
+const REFRESH_TOKEN_KEY = "cashify_refresh_token";
 
 export interface StoredTokens {
     accessToken: string;
@@ -8,19 +9,20 @@ export interface StoredTokens {
 }
 
 export async function saveTokens(tokens: StoredTokens): Promise<void> {
-    await Keychain.setGenericPassword(
-        TOKEN_KEY,
-        JSON.stringify(tokens),
-        {service: TOKEN_KEY}
-    );
+    await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, tokens.accessToken);
+    await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, tokens.refreshToken);
 }
 
 export async function getTokens(): Promise<StoredTokens | null> {
-    const result = await Keychain.getGenericPassword({ service: TOKEN_KEY});
-    if (!result) return null;
-    return JSON.parse(result.password) as StoredTokens;
+    const accessToken = await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+    const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+
+    if (!accessToken || !refreshToken) return null;
+
+    return { accessToken, refreshToken };
 }
 
 export async function clearTokens(): Promise<void> {
-    await Keychain.resetGenericPassword({ service: TOKEN_KEY });
+    await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+    await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
 }
