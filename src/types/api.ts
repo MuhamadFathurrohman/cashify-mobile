@@ -43,6 +43,41 @@ export interface Session {
     expires_at: number;
 }
 
+// Auth
+export interface LoginRequest {
+    email: string;
+    password: string;
+}
+
+export interface LoginResponse {
+    user: UserProfile;
+    session: Session;
+}
+
+export interface RegisterRequest {
+    email: string;
+    password: string;
+    full_name: string;
+}
+
+export interface RegisterResponse {
+    user: UserProfile;
+    session: Session;
+}
+
+export interface ForgotPasswordRequest {
+    email: string;
+}
+
+export interface ResetPasswordRequest {
+    token: string;
+    password: string;
+}
+
+export interface LogoutRequest {
+    refresh_token: string;
+}
+
 export interface Category {
     id: string;
     name: string;
