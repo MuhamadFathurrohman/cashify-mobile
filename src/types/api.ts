@@ -54,6 +54,14 @@ export interface LoginResponse {
     session: Session;
 }
 
+export interface RefreshRequest {
+    refresh_token: string;
+}
+
+export interface RefreshResponse {
+    session: Session;
+}
+
 export interface RegisterRequest {
     email: string;
     password: string;
@@ -74,9 +82,6 @@ export interface ResetPasswordRequest {
     password: string;
 }
 
-export interface LogoutRequest {
-    refresh_token: string;
-}
 
 export interface Category {
     id: string;

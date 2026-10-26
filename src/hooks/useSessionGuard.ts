@@ -1,150 +1,83 @@
-import { clearTokens, getTokens, saveTokens } from "@/lib/storage/keychain";
-import { supabase } from "@/lib/supabase/client";
+import { useAuthStore, type AuthStatus } from "@/features/auth/authStore";
+import { apiClient } from "@/lib/api/client";
+import { getTokens } from "@/lib/storage/keychain";
+import type { UserProfile } from "@/types/api";
 import { useRouter, useSegments } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
-/**
- * Cek apakah segment aktif sudah berada di grup yang benar.
- * Mencegah redirect loop saat user sudah di halaman yang tepat.
- */
+type ResolvedStatus = Exclude<AuthStatus, "loading">;
 
-function getActiveGroup(segments: string[]): "(auth)" | "(onboarding)" | "(tabs)" | null {
-    if (segments[0] === "(auth)") return "(auth)";
-    if (segments[0] === "(onboarding)") return "(onboarding)";
-    if (segments[0] === "(tabs)") return "(tabs)";
-    return null
-}
+// Grup rute yang boleh diakses per status. "transaction" berada di luar grup
+// tapi hanya untuk pengguna yang sudah siap
+const ALLOWED_GROUPS: Record<ResolvedStatus, string[]> = {
+    signedOut: ["(auth)"],
+    needsOnboarding: ["(onboarding)"],
+    ready: ["(tabs)", "transaction"],
+    unavailable: ["(auth)"],
+};
+
+const DEFAULT_ROUTE = {
+    signedOut: "/(auth)/login",
+    needsOnboarding: "/(onboarding)/welcome",
+    ready: "/(tabs)",
+    unavailable: "/(auth)/unavailable",
+} as const;
 
 export function useSessionGuard() {
-    const [isReady, setIsReady] = useState(false);
     const router = useRouter();
     const segments = useSegments();
+    const status = useAuthStore((s) => s.status);
 
+    // Jalankan bootstrap setiap kali status berubah ke "loading".
+    // Ini mencakup dua kasus:
+    //   1. Pertama kali app dibuka (status awal = "loading")
+    //   2. Pengguna menekan "Coba Lagi" di layar unavailable (setLoading → "loading")
     useEffect(() => {
-        let isMounted = true;
+        if (status !== "loading") return;
 
-        async function checkSession() {
+        let cancelled = false;
+
+        async function bootstrap() {
+            const { setUser, setSignedOut, setUnavailable } =
+                useAuthStore.getState();
             try {
-                // mengambil token dari keychain
-                const stored = await getTokens();
-
-                if (!stored) {
-                    // tidak ada token yang tersimpan, di arahkan ke login
-                    if (isMounted) {
-                        if (getActiveGroup(segments) !== "(auth)") {
-                            router.replace("/(auth)/login")
-                        }
-                        setIsReady(true);
-                    }
+                const tokens = await getTokens();
+                if (!tokens) {
+                    if (!cancelled) setSignedOut();
                     return;
                 }
-
-                // set session ke supabase dari token yang tersimpan di keychain
-                const { data: sessionData, error: sessionError } =
-                    await supabase.auth.setSession({
-                        access_token: stored.accessToken,
-                        refresh_token: stored.refreshToken,
-                    });
-
-                if (sessionError || !sessionData.session) {
-                    // token tidak valid atau expired dan tidak bisa di referesh
-                    await clearTokens();
-                    if (isMounted) {
-                        if (getActiveGroup(segments) !== "(auth)") {
-                            router.replace("/(auth)/login")
-                        }
-                        setIsReady(true);
-                    }
-                    return;
-                }
-
-                // simpan token baru jika supabase melakukan referesh otomatis
-                const { access_token, refresh_token } = sessionData.session;
-                if (
-                    access_token !== stored.accessToken ||
-                    refresh_token !== stored.refreshToken
-                ) {
-                    await saveTokens({
-                        accessToken: access_token,
-                        refreshToken: refresh_token,
-                    });
-                }
-
-                // cek status onboarding dari endpoint GET /me
-                const response = await fetch(
-                    `${process.env.EXPO_PUBLIC_API_URL}/me`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${access_token}`,
-                            "Content-type": "application/json",
-                        },
-                    }
-                );
-
-                if (!response.ok) {
-                    // gagal ambil profil (kembali ke login sebagai fallback aman)
-                    await clearTokens();
-                    if (isMounted) {
-                        if (getActiveGroup(segments) !== "(auth)") {
-                            router.replace("/(auth)/login");
-                        }
-                        setIsReady(true);
-                    }
-                    return;
-                }
-
-                const { onboarding_completed_at } = await response.json();
-
-                if (!isMounted) return;
-
-                // diarahkan berdasarkan status onboarding
-                if (!onboarding_completed_at) {
-                    if (getActiveGroup(segments) !== "(onboarding)") {
-                        router.replace("/(onboarding)/welcome");
-                    }
-                } else {
-                    if (getActiveGroup(segments) !== "(tabs)") {
-                        router.replace("/(tabs)");
-                    }
-                }
-
-                setIsReady(true);
+                // apiClient menangani refresh token saat 401
+                const user = await apiClient.get<UserProfile>("/me");
+                if (!cancelled) setUser(user);
             } catch {
-                // error tak terduga diarahkan ke login sebagai fallback aman
-                await clearTokens();
-                if (isMounted) {
-                    if (getActiveGroup(segments) !== "(auth)") {
-                        router.replace("/(auth)/login");
-                    }
-                    setIsReady(true);
-                }
+                if (cancelled) return;
+                // Bila sesi berakhir (refresh token ditolak), apiClient sudah
+                // memanggil setSignedOut via sessionExpiredHandler sebelum melempar
+                // error. Cek status aktual store untuk menghindari menimpa "signedOut"
+                // dengan "unavailable".
+                if (useAuthStore.getState().status === "signedOut") return;
+                // Jaringan tidak terjangkau atau server error (5xx):
+                // token dipertahankan, arahkan ke layar unavailable
+                setUnavailable();
             }
         }
 
-        checkSession();
-
-        // subscribe ke peruban auth state dari supabase
-        // Menangkap logout dari sisi lain (mis. sesi expired di background)
-        const { data: authListener } = supabase.auth.onAuthStateChange(
-            async (event) => {
-                if (!isMounted) return;
-
-                if (event === "SIGNED_OUT") {
-                    await clearTokens();
-                    router.replace("/(auth)/login");
-                }
-            }
-        );
-
+        bootstrap();
         return () => {
-            isMounted = false;
-            authListener.subscription.unsubscribe();
+            cancelled = true;
         };
+    }, [status]);
 
-        // segments sengaja tidak dimasukkan ke dependency array —
-        // guard hanya perlu jalan sekali saat mount, bukan setiap navigasi
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    // Arahkan ke grup yang sesuai setiap status atau rute berubah
+    // (login, logout, sesi habis, onboarding selesai, unavailable)
+    useEffect(() => {
+        if (status === "loading") return;
 
-    return { isReady };
+        const group = segments[0] as string | undefined;
+        if (!group || !ALLOWED_GROUPS[status].includes(group)) {
+            router.replace(DEFAULT_ROUTE[status]);
+        }
+    }, [status, segments, router]);
+
+    return { isReady: status !== "loading" };
 }
