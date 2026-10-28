@@ -2,6 +2,8 @@ import { clearTokens, getTokens, saveTokens } from "@/lib/storage/keychain";
 import type { ApiError, RefreshRequest, RefreshResponse } from "@/types/api";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+// Batas tunggu respons; tanpa ini fetch bisa menggantung (mis. bootstrap macet di splash)
+const REQUEST_TIMEOUT_MS = 15_000;
 
 export class ApiRequestError extends Error {
     constructor(
@@ -40,15 +42,26 @@ async function send(
         headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
     try {
-        return await fetch(`${BASE_URL}${path}`, { ...options, headers });
+        return await fetch(`${BASE_URL}${path}`, {
+            ...options,
+            headers,
+            signal: controller.signal,
+        });
     } catch {
         // fetch hanya melempar error jika request tidak sampai ke server
         throw new ApiRequestError(
             "NETWORK_ERROR",
-            "Tidak dapat terhubung ke server. Periksa koneksi kamu.",
+            controller.signal.aborted
+                ? "Server tidak merespons. Coba lagi."
+                : "Tidak dapat terhubung ke server. Periksa koneksi kamu.",
             0
         );
+    } finally {
+        clearTimeout(timer);
     }
 }
 
