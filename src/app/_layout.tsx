@@ -1,4 +1,5 @@
 import { SplashScreen as CashifySplashScreen } from "@/components/ui/SplashScreen";
+import { startLinkCapture } from "@/features/auth/recoveryLinkStore";
 import { useSessionGuard } from "@/hooks/useSessionGuard";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
@@ -10,6 +11,7 @@ import "../../global.css";
 
 // Tahan native splash screen agar tidak hilang otomatis
 SplashScreen.preventAutoHideAsync();
+startLinkCapture();
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -98,8 +98,16 @@ export function useForgotPassword() {
 }
 
 export function useResetPassword() {
+    const queryClient = useQueryClient();
     return useMutation<void, Error, ResetPasswordRequest>({
         mutationFn: resetPasswordApi,
+        // Backend tidak mencabut sesi lain; sesi lokal dibersihkan agar akun tidak tercampur.
+        // Ditunggu dulu agar token sudah hilang sebelum layar berpindah
+        onSuccess: async () => {
+            await clearTokens();
+            queryClient.clear();
+            useAuthStore.getState().setSignedOut();
+        },
         retry: 0,
     });
 }

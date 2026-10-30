@@ -73,7 +73,11 @@ export function useSessionGuard() {
     useEffect(() => {
         if (status === "loading") return;
 
-        const group = segments[0] as string | undefined;
+        const parts: readonly string[] = segments;
+        const group = parts[0];
+        // Tautan reset bisa dibuka pada status apa pun, termasuk saat sudah login
+        if (group === "(auth)" && parts[1] === "reset-password") return;
+
         if (!group || !ALLOWED_GROUPS[status].includes(group)) {
             router.replace(DEFAULT_ROUTE[status]);
         }
