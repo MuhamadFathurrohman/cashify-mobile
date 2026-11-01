@@ -18,7 +18,7 @@ import { useRegister } from "@/features/auth/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { useRouter } from "expo-router";
-import { useEffect, useRef } from "react";
+import { ComponentRef, useEffect, useRef } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -34,7 +34,7 @@ import {
 // ─── Komponen ─────────────────────────────────────────────────────────────────
 export default function RegisterPasswordScreen() {
   const router = useRouter();
-  const confirmRef = useRef<TextInput>(null);
+  const confirmRef = useRef<ComponentRef<typeof TextInput>>(null);
   const { account, setEmailError, setResult } = useRegisterFlow();
   const { mutate: register, isPending } = useRegister();
 
@@ -193,7 +193,7 @@ export default function RegisterPasswordScreen() {
                       autoComplete="new-password"
                       textContentType="newPassword"
                       returnKeyType="done"
-                      onSubmitEditing={handleSubmit(onSubmit)}
+                      onSubmitEditing={() => handleSubmit(onSubmit)()}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -230,7 +230,7 @@ export default function RegisterPasswordScreen() {
                 shadowRadius: 10,
                 elevation: 4,
               }}
-              onPress={handleSubmit(onSubmit)}
+              onPress={() => handleSubmit(onSubmit)()}
               disabled={isPending}
               activeOpacity={0.85}
               accessibilityRole="button"

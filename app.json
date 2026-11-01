@@ -12,10 +12,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "",
-        "backgroundImage": "",
-        "monochromeImage": ""
+        "backgroundColor": "#f8f9ff",
+        "foregroundImage": "./assets/images/cashify-icon.png"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -31,7 +29,7 @@
         {
           "backgroundColor": "#f8f9ff",
           "image": "./assets/images/logo-icon-cashify.png",
-          "imageWidth": 112
+          "imageWidth": 160
         }
       ],
       "@react-native-vector-icons/ionicons",

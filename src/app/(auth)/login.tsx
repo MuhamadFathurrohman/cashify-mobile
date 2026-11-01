@@ -217,7 +217,7 @@ export default function LoginScreen() {
                     shadowRadius: 1,
                     elevation: 1,
                   }}
-                  onPress={handleSubmit(onSubmit)}
+                  onPress={() => handleSubmit(onSubmit)()}
                   disabled={isPending}
                   activeOpacity={0.85}
                 >

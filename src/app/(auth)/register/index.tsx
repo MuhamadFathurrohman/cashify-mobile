@@ -9,7 +9,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { useRouter } from "expo-router";
-import { useRef } from "react";
+import { ComponentRef, useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Image,
@@ -30,7 +30,7 @@ const iconGoogle = require("@/assets/icons/icon-google.png");
 // ─── Komponen ─────────────────────────────────────────────────────────────────
 export default function RegisterAccountScreen() {
   const router = useRouter();
-  const emailRef = useRef<TextInput>(null);
+  const emailRef = useRef<ComponentRef<typeof TextInput>>(null);
   const { account, setAccount, emailError, setEmailError } = useRegisterFlow();
 
   const {
@@ -156,7 +156,7 @@ export default function RegisterAccountScreen() {
                     autoComplete="email"
                     textContentType="emailAddress"
                     returnKeyType="done"
-                    onSubmitEditing={handleSubmit(onSubmit)}
+                    onSubmitEditing={() => handleSubmit(onSubmit)()}
                     onBlur={onBlur}
                     onChangeText={(text) => {
                       onChange(text);
@@ -178,7 +178,7 @@ export default function RegisterAccountScreen() {
                   shadowRadius: 1,
                   elevation: 1,
                 }}
-                onPress={handleSubmit(onSubmit)}
+                onPress={() => handleSubmit(onSubmit)()}
                 activeOpacity={0.85}
                 accessibilityRole="button"
               >

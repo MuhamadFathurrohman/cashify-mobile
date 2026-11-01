@@ -18,7 +18,11 @@ function notify() {
 
 function capture(url: string) {
     const result = parseRecoveryUrl(url);
-    if (result.kind === "invalid") return;
+    if (result.kind === "invalid") {
+        // Tautan reset yang rusak membuang token lama agar tidak terpakai tanpa sengaja
+        if (url.includes("reset-password")) clearRecoveryLink();
+        return;
+    }
     latest = result;
     notify();
 }

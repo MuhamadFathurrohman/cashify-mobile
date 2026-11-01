@@ -59,7 +59,9 @@ export default function ForgotPasswordScreen() {
   });
 
   const leaveToLogin = () => {
-    if (router.canGoBack()) router.back();
+    // dismissTo membuang semua layar di atas login, jadi layar forgot-password ganda
+    // tidak menahan pengguna di forgot-password
+    if (router.canGoBack()) router.dismissTo("/(auth)/login");
     else router.replace("/(auth)/login");
   };
 
@@ -204,7 +206,7 @@ export default function ForgotPasswordScreen() {
                         autoComplete="email"
                         textContentType="emailAddress"
                         returnKeyType="send"
-                        onSubmitEditing={handleSubmit(onSubmit)}
+                        onSubmitEditing={() => handleSubmit(onSubmit)()}
                         onBlur={onBlur}
                         onChangeText={onChange}
                         value={value}
@@ -216,7 +218,7 @@ export default function ForgotPasswordScreen() {
 
                   <TouchableOpacity
                     className="h-[54px] flex-row items-center justify-center gap-2 rounded-[16px] bg-[#006c50]"
-                    onPress={handleSubmit(onSubmit)}
+                    onPress={() => handleSubmit(onSubmit)()}
                     disabled={isPending}
                     activeOpacity={0.85}
                     accessibilityRole="button"

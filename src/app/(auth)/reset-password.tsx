@@ -21,7 +21,13 @@ import { useResetPassword } from "@/features/auth/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useRef, useState, useSyncExternalStore } from "react";
+import {
+  ComponentRef,
+  useCallback,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -50,7 +56,7 @@ const cardShadow = {
 // ─── Komponen ─────────────────────────────────────────────────────────────────
 export default function ResetPasswordScreen() {
   const router = useRouter();
-  const confirmRef = useRef<TextInput>(null);
+  const confirmRef = useRef<ComponentRef<typeof TextInput>>(null);
   // Token ditangkap di root sebelum layar ini terpasang; layar hanya membaca
   const link = useSyncExternalStore(subscribeRecoveryLink, getRecoveryLink);
   const { mutate: resetPassword, isPending } = useResetPassword();
@@ -119,6 +125,8 @@ export default function ResetPasswordScreen() {
           const { field, message, invalidLink } =
             resolveResetPasswordError(error);
           if (invalidLink) {
+            // Pertahankan tampilan form sampai navigasi selesai (lihat done)
+            setDone(true);
             notify.error("Tautan Tidak Valid", message);
             goToForgotPassword();
           } else if (field === "password") {
@@ -229,7 +237,7 @@ export default function ResetPasswordScreen() {
                           autoComplete="new-password"
                           textContentType="newPassword"
                           returnKeyType="done"
-                          onSubmitEditing={handleSubmit(onSubmit)}
+                          onSubmitEditing={() => handleSubmit(onSubmit)()}
                           onBlur={onBlur}
                           onChangeText={onChange}
                           value={value}
@@ -264,7 +272,7 @@ export default function ResetPasswordScreen() {
                     shadowRadius: 10,
                     elevation: 4,
                   }}
-                  onPress={handleSubmit(onSubmit)}
+                  onPress={() => handleSubmit(onSubmit)()}
                   disabled={busy}
                   activeOpacity={0.85}
                   accessibilityRole="button"

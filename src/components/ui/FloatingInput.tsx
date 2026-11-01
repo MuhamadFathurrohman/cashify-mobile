@@ -1,5 +1,5 @@
 import Ionicons from "@react-native-vector-icons/ionicons";
-import { Ref, useState } from "react";
+import { ComponentRef, Ref, useState } from "react";
 import {
   Text,
   TextInput,
@@ -24,7 +24,7 @@ interface FloatingInputProps extends Omit<TextInputProps, "style"> {
   secureTextEntry?: boolean;
   editable?: boolean;
   // ref diterima sebagai prop di pakai untuk pindah fokus antar kolom
-  ref?: Ref<TextInput>;
+  ref?: Ref<ComponentRef<typeof TextInput>>;
 }
 
 // ─── Komponen ─────────────────────────────────────────────────────────────────
