@@ -56,7 +56,9 @@ export function FloatingInput({
   }));
 
   const handleFocus = (e: any) => {
+    // eslint-disable-next-line react-hooks/immutability
     labelOpacity.value = withTiming(1, TIMING);
+    // eslint-disable-next-line react-hooks/immutability
     labelTranslateY.value = withTiming(0, TIMING);
     setIsFocused(true);
     onFocus?.(e);
@@ -64,7 +66,9 @@ export function FloatingInput({
 
   const handleBlur = (e: any) => {
     if (!value) {
+      // eslint-disable-next-line react-hooks/immutability
       labelOpacity.value = withTiming(0, TIMING);
+      // eslint-disable-next-line react-hooks/immutability
       labelTranslateY.value = withTiming(4, TIMING);
     }
     setIsFocused(false);
