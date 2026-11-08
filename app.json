@@ -11,6 +11,7 @@
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.cashify.app",
       "adaptiveIcon": {
         "backgroundColor": "#f8f9ff",
         "foregroundImage": "./assets/images/cashify-icon.png"
@@ -33,7 +34,8 @@
         }
       ],
       "@react-native-vector-icons/ionicons",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
