@@ -82,6 +82,73 @@ export interface ResetPasswordRequest {
     password: string;
 }
 
+// ⚠️ DEV BUILD REQUIRED: Google Sign-In membutuhkan development build.
+// Tipe ini sudah siap; implementasi native diaktifkan setelah:
+// 1. webClientId dari tim backend diisi di app.json
+// 2. npx expo run:android dijalankan
+// 3. Keputusan Expo Go vs development build dikonfirmasi
+export interface GoogleAuthRequest {
+    id_token: string;
+}
+
+export interface GoogleAuthResponse {
+    user: UserProfile;
+    session: Session;
+}
+
+// Profile
+export interface UpdateProfileRequest {
+    full_name?: string;
+    avatar_url?: string | null;
+    initial_balance?: number;
+}
+
+// POST /me/onboarding/complete dan PATCH /me keduanya mengembalikan UserProfile
+export type UpdateProfileResponse = UserProfile;
+
+// WhatsApp (kontrak mengikuti SYSTEM_DOCUMENTATION backend, bagian 7.3 dan 8.7)
+export interface WhatsAppPreferences {
+    daily_summary_enabled: boolean;
+    budget_alert_enabled: boolean;
+}
+
+// GET /whatsapp/status: sumber kebenaran status tautan, terpisah dari onboarding
+export interface WhatsAppStatusResponse {
+    status: WhatsappStatus;
+    masked_phone: string | null; // mis. "+6281234xxxx9"
+    expires_at: string | null; // hanya saat pending
+    verified_at: string | null; // hanya saat verified
+    last_message_at: string | null;
+    preferences: WhatsAppPreferences;
+}
+
+export interface LinkWhatsAppRequest {
+    // E.164 dengan "+", mis. "+628123456789"; backend tidak menormalisasi
+    phone: string;
+}
+
+// Respons POST /whatsapp/link/request dan /whatsapp/link/resend
+export interface LinkWhatsAppResponse {
+    status: "pending";
+    expires_at: string;
+    masked_phone: string;
+}
+
+export interface VerifyWhatsAppRequest {
+    code: string; // tepat 6 digit
+}
+
+// phone sudah disamarkan oleh backend
+export interface VerifyWhatsAppResponse {
+    status: "verified";
+    phone: string;
+    verified_at: string;
+}
+
+// POST /whatsapp/link/resend — tanpa body
+export type ResendWhatsAppOtpRequest = undefined;
+export type ResendWhatsAppOtpResponse = LinkWhatsAppResponse;
+
 
 export interface Category {
     id: string;
@@ -99,12 +166,16 @@ export interface Account {
     is_default: boolean;
 }
 
+// Bentuk ringkas yang dipakai backend pada item transaksi (📄 SYSTEM_DOCUMENTATION, belum diuji ❓)
+export type CategorySummary = Pick<Category, "id" | "name" | "icon" | "color">;
+export type AccountSummary = Pick<Account, "id" | "name">;
+
 export interface Transaction {
     id: string;
     type: TransactionType;
     amount: number;
-    category: Category;
-    account: Account;
+    category: CategorySummary;
+    account: AccountSummary;
     date: string;
     description: string | null;
     source: TransactionSource;
@@ -118,4 +189,41 @@ export interface TransactionDetail extends Transaction {
         body: string;
         received_at: string;
     } | null;
+}
+
+// Dashboard — GET /dashboard?month=YYYY-MM (📄 SYSTEM_DOCUMENTATION; belum diuji dengan respons nyata ❓)
+// Item recent_transactions: maksimal 5, tidak terpengaruh `month`. Field yang diasumsikan ada
+// (selain source, category, account yang tercatat di dokumen) perlu dicek dengan respons asli.
+export type DashboardTransaction = Pick<
+    Transaction,
+    | "id"
+    | "type"
+    | "amount"
+    | "date"
+    | "description"
+    | "source"
+    | "category"
+    | "account"
+    | "created_at"
+>;
+
+export interface DashboardMonthSummary {
+    income: number;
+    expense: number;
+    net: number;
+}
+
+// Hanya hari yang punya transaksi yang muncul di array; date berformat YYYY-MM-DD
+export interface DashboardCashflowPoint {
+    date: string;
+    income: number;
+    expense: number;
+}
+
+export interface DashboardResponse {
+    // initial_balance + seluruh pemasukan - seluruh pengeluaran (seluruh waktu); bisa negatif
+    balance: number;
+    month: DashboardMonthSummary;
+    cashflow: DashboardCashflowPoint[];
+    recent_transactions: DashboardTransaction[];
 }

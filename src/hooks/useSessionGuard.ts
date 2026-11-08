@@ -1,4 +1,8 @@
 import { useAuthStore, type AuthStatus } from "@/features/auth/authStore";
+import {
+    resolveOnboardingStep,
+    useOnboardingStore,
+} from "@/features/onboarding/onboardingStore";
 import { apiClient } from "@/lib/api/client";
 import { getTokens } from "@/lib/storage/keychain";
 import type { UserProfile } from "@/types/api";
@@ -16,12 +20,27 @@ const ALLOWED_GROUPS: Record<ResolvedStatus, string[]> = {
     unavailable: ["(auth)"],
 };
 
+const ONBOARDING_ROUTE = {
+    welcome: "/(onboarding)/welcome",
+    "initial-balance": "/(onboarding)/initial-balance",
+    whatsapp: "/(onboarding)/whatsapp",
+} as const;
+
 const DEFAULT_ROUTE = {
     signedOut: "/(auth)/login",
-    needsOnboarding: "/(onboarding)/welcome",
     ready: "/(tabs)",
     unavailable: "/(auth)/unavailable",
 } as const;
+
+// needsOnboarding memakai progres lokal agar app dibuka kembali di langkah terakhir
+function getDefaultRoute(status: ResolvedStatus) {
+    if (status === "needsOnboarding") {
+        const userId = useAuthStore.getState().user?.id;
+        const { progress } = useOnboardingStore.getState();
+        return ONBOARDING_ROUTE[resolveOnboardingStep(progress, userId)];
+    }
+    return DEFAULT_ROUTE[status];
+}
 
 export function useSessionGuard() {
     const router = useRouter();
@@ -40,6 +59,12 @@ export function useSessionGuard() {
         async function bootstrap() {
             const { setUser, setSignedOut, setUnavailable } =
                 useAuthStore.getState();
+
+            // Progres onboarding dimuat sebelum status ditentukan, apa pun hasil
+            // cek token, supaya rute resume sudah siap saat guard mengarahkan
+            await useOnboardingStore.getState().ensureLoaded();
+            if (cancelled) return;
+
             try {
                 const tokens = await getTokens();
                 if (!tokens) {
@@ -79,7 +104,7 @@ export function useSessionGuard() {
         if (group === "(auth)" && parts[1] === "reset-password") return;
 
         if (!group || !ALLOWED_GROUPS[status].includes(group)) {
-            router.replace(DEFAULT_ROUTE[status]);
+            router.replace(getDefaultRoute(status));
         }
     }, [status, segments, router]);
 

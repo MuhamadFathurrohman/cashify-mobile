@@ -3,6 +3,8 @@ import { apiClient } from "@/lib/api/client";
 import { clearTokens, saveTokens } from "@/lib/storage/keychain";
 import type {
     ForgotPasswordRequest,
+    GoogleAuthRequest,
+    GoogleAuthResponse,
     LoginRequest,
     LoginResponse,
     RegisterRequest,
@@ -11,7 +13,7 @@ import type {
 } from "@/types/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-// API Function
+// ─── API Functions ────────────────────────────────────────────────────────────
 
 async function loginApi(payload: LoginRequest): Promise<LoginResponse> {
     const response = await apiClient.post<LoginResponse>(
@@ -42,6 +44,25 @@ async function resetPasswordApi(payload: ResetPasswordRequest): Promise<void> {
     await apiClient.post<void>("/auth/reset-password", payload, false);
 }
 
+// ⚠️ DEV BUILD REQUIRED: useGoogleAuth membutuhkan development build.
+// GoogleSignin.signIn() hanya bisa dipanggil setelah:
+// 1. webClientId dari tim backend diisi di app.json
+// 2. npx expo run:android dijalankan
+// 3. Keputusan Expo Go vs development build dikonfirmasi
+// Pola alur: GoogleSignin.signIn() → dapat id_token → POST /auth/google → simpan token → setUser
+async function googleAuthApi(payload: GoogleAuthRequest): Promise<GoogleAuthResponse> {
+    const response = await apiClient.post<GoogleAuthResponse>(
+        "/auth/google",
+        payload,
+        false
+    );
+    await saveTokens({
+        accessToken: response.session.access_token,
+        refreshToken: response.session.refresh_token,
+    });
+    return response;
+}
+
 // Fire-and-forget: sesi lokal tetap dihapus meski request gagal.
 // Endpoint logout tanpa body (JWT saja)
 async function logoutApi(): Promise<void> {
@@ -49,15 +70,14 @@ async function logoutApi(): Promise<void> {
     await clearTokens();
 }
 
-// Hooks
+// ─── Hooks ───────────────────────────────────────────────────────────────────
 
 export function useLogin() {
     const queryClient = useQueryClient();
     return useMutation<LoginResponse, Error, LoginRequest>({
         mutationFn: loginApi,
-        // Token sudah tersimpan di loginApi; setUser memicu redirect lewat guard
         onSuccess: (data) => {
-            queryClient.clear(); // buang cache milik sesi sebelumnya
+            queryClient.clear();
             useAuthStore.getState().setUser(data.user);
         },
         retry: 0,
@@ -83,7 +103,7 @@ export function useCompleteRegistration() {
             });
         },
         onSuccess: (_data, { user }) => {
-            queryClient.clear(); // buang cache milik sesi sebelumnya
+            queryClient.clear();
             useAuthStore.getState().setUser(user);
         },
         retry: 0,
@@ -101,12 +121,22 @@ export function useResetPassword() {
     const queryClient = useQueryClient();
     return useMutation<void, Error, ResetPasswordRequest>({
         mutationFn: resetPasswordApi,
-        // Backend tidak mencabut sesi lain; sesi lokal dibersihkan agar akun tidak tercampur.
-        // Ditunggu dulu agar token sudah hilang sebelum layar berpindah
         onSuccess: async () => {
             await clearTokens();
             queryClient.clear();
             useAuthStore.getState().setSignedOut();
+        },
+        retry: 0,
+    });
+}
+
+export function useGoogleAuth() {
+    const queryClient = useQueryClient();
+    return useMutation<GoogleAuthResponse, Error, GoogleAuthRequest>({
+        mutationFn: googleAuthApi,
+        onSuccess: (data) => {
+            queryClient.clear();
+            useAuthStore.getState().setUser(data.user);
         },
         retry: 0,
     });

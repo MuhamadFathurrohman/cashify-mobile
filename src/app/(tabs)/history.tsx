@@ -1,12 +1,11 @@
-import { Text, View } from "react-native";
+import { ComingSoon } from "@/components/ui/ComingSoon";
 
 export default function HistoryScreen() {
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-lg font-semibold text-gray-800">Riwayat</Text>
-      <Text className="text-sm text-gray-400 mt-1">
-        Placeholder — belum diimplementasi
-      </Text>
-    </View>
+    <ComingSoon
+      icon="receipt-outline"
+      title="Transaksi"
+      description="Riwayat transaksi segera hadir."
+    />
   );
 }
