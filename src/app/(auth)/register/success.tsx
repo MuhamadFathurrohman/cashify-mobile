@@ -33,7 +33,9 @@ export default function RegisterSuccessScreen() {
   }));
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     iconScale.value = withTiming(1, { duration: 350 });
+    // eslint-disable-next-line react-hooks/immutability
     iconOpacity.value = withTiming(1, { duration: 350 });
   }, [iconScale, iconOpacity]);
 

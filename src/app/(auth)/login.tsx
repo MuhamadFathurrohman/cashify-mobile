@@ -1,7 +1,7 @@
 import { AmbientBlob } from "@/components/ui/AmbientBlob";
 import { FloatingInput } from "@/components/ui/FloatingInput";
 import { notify } from "@/components/ui/notify";
-import { useLogin } from "@/features/auth/useAuth";
+import { useGoogleAuth, useLogin } from "@/features/auth/useAuth";
 import { ApiRequestError } from "@/lib/api/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Ionicons from "@react-native-vector-icons/ionicons";
@@ -69,6 +69,7 @@ function resolveErrorMessage(error: Error): string {
 export default function LoginScreen() {
   const router = useRouter();
   const { mutate: login, isPending } = useLogin();
+  const { mutate: googleAuth, isPending: isGooglePending } = useGoogleAuth();
 
   const {
     control,
@@ -90,8 +91,32 @@ export default function LoginScreen() {
     );
   };
 
+  // ⚠️ DEV BUILD REQUIRED: aktifkan blok di bawah setelah development build siap.
+  // Langkah aktivasi:
+  // 1. Dapat webClientId dari tim backend → isi di app.json
+  // 2. Konfirmasi keputusan Expo Go vs development build
+  // 3. Jalankan: npx expo run:android
+  // 4. Import GoogleSignin dari @react-native-google-signin/google-signin
+  // 5. Tambah GoogleSignin.configure({ webClientId }) di luar komponen
+  // 6. Ganti isi fungsi ini dengan:
+  //    try {
+  //      await GoogleSignin.hasPlayServices();
+  //      const { data } = await GoogleSignin.signIn();
+  //      if (!data?.idToken) throw new Error("id_token tidak ditemukan");
+  //      googleAuth(
+  //        { id_token: data.idToken },
+  //        { onError: (err) => {
+  //            const msg = resolveGoogleAuthError(err);
+  //            if (msg) notify.error("Gagal Masuk", msg);
+  //          }
+  //        }
+  //      );
+  //    } catch (err) {
+  //      const msg = resolveGoogleSignInError(err);
+  //      if (msg) notify.error("Gagal Masuk", msg);
+  //    }
   const handleGoogleLogin = () => {
-    // TODO: implementasi Google OAuth — tunggu endpoint /auth/google siap
+    notify.info("Segera Hadir", "Login dengan Google akan segera tersedia.");
   };
 
   return (
@@ -218,7 +243,7 @@ export default function LoginScreen() {
                     elevation: 1,
                   }}
                   onPress={() => handleSubmit(onSubmit)()}
-                  disabled={isPending}
+                  disabled={isPending || isGooglePending}
                   activeOpacity={0.85}
                 >
                   {isPending ? (
@@ -253,7 +278,7 @@ export default function LoginScreen() {
                 className="h-[50px] w-full rounded-[16px] border border-[rgba(196,198,206,0.5)] bg-white flex-row items-center justify-center gap-3"
                 onPress={handleGoogleLogin}
                 activeOpacity={0.8}
-                disabled={isPending}
+                disabled={isPending || isGooglePending}
               >
                 <Image
                   source={iconGoogle}
