@@ -1,7 +1,9 @@
 import { SplashScreen as CashifySplashScreen } from "@/components/ui/SplashScreen";
 import { startLinkCapture } from "@/features/auth/recoveryLinkStore";
 import { useSessionGuard } from "@/hooks/useSessionGuard";
+import { APP_FONTS } from "@/lib/fonts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
@@ -28,14 +30,18 @@ const queryClient = new QueryClient({
 
 function RootLayoutNav() {
   const { isReady } = useSessionGuard();
+  const [fontsLoaded, fontError] = useFonts(APP_FONTS);
+
+  // Gagal memuat font tidak boleh memblokir aplikasi: lanjut dengan font sistem
+  const appReady = isReady && (fontsLoaded || !!fontError);
 
   useEffect(() => {
-    if (isReady) {
+    if (appReady) {
       SplashScreen.hide();
     }
-  }, [isReady]);
+  }, [appReady]);
 
-  if (!isReady) {
+  if (!appReady) {
     return <CashifySplashScreen />;
   }
 
