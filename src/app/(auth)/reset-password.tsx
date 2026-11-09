@@ -184,10 +184,10 @@ export default function ResetPasswordScreen() {
               /* ── Form reset ── */
               <>
                 <View className="items-center gap-[3px] pb-5">
-                  <Text className="text-[#001d37] text-[22px] font-bold leading-[27.5px] text-center">
+                  <Text className="font-sans text-[#001d37] text-[22px] font-bold leading-[27.5px] text-center">
                     Reset Kata Sandi
                   </Text>
-                  <Text className="text-[#74777e] text-[13px] font-normal leading-[19.5px] text-center max-w-[270px]">
+                  <Text className="font-sans text-[#74777e] text-[13px] font-normal leading-[19.5px] text-center max-w-[270px]">
                     Buat kata sandi baru yang kuat untuk akunmu.
                   </Text>
                 </View>
@@ -253,7 +253,7 @@ export default function ResetPasswordScreen() {
                           size={13}
                           color="#006c50"
                         />
-                        <Text className="text-[#006c50] text-[11px] font-normal leading-[16.5px]">
+                        <Text className="font-sans text-[#006c50] text-[11px] font-normal leading-[16.5px]">
                           Kata sandi cocok
                         </Text>
                       </View>
@@ -280,7 +280,7 @@ export default function ResetPasswordScreen() {
                   {isPending ? (
                     <ActivityIndicator size="small" color="#ffffff" />
                   ) : (
-                    <Text className="text-white text-[16px] font-semibold leading-[24px]">
+                    <Text className="font-sans text-white text-[16px] font-semibold leading-[24px]">
                       Simpan Kata Sandi Baru
                     </Text>
                   )}
@@ -300,10 +300,10 @@ export default function ResetPasswordScreen() {
                   />
                 </View>
                 <View className="items-center gap-2">
-                  <Text className="text-[#001d37] text-[20px] font-semibold leading-[26px] text-center">
+                  <Text className="font-sans text-[#001d37] text-[20px] font-semibold leading-[26px] text-center">
                     Tautan Tidak Valid
                   </Text>
-                  <Text className="text-[#43474d] text-[13px] font-normal leading-[20px] text-center">
+                  <Text className="font-sans text-[#43474d] text-[13px] font-normal leading-[20px] text-center">
                     Tautan reset kata sandi tidak valid atau sudah kedaluwarsa.
                     Minta tautan baru untuk melanjutkan.
                   </Text>
@@ -314,7 +314,7 @@ export default function ResetPasswordScreen() {
                   activeOpacity={0.85}
                   accessibilityRole="button"
                 >
-                  <Text className="text-white text-[16px] font-semibold leading-[22px]">
+                  <Text className="font-sans text-white text-[16px] font-semibold leading-[22px]">
                     Minta Tautan Baru
                   </Text>
                 </TouchableOpacity>
@@ -330,7 +330,7 @@ export default function ResetPasswordScreen() {
                 accessibilityRole="button"
               >
                 <Ionicons name="arrow-back" size={14} color="#006c50" />
-                <Text className="text-[#006c50] text-[12px] font-semibold tracking-[0.24px] leading-[16px]">
+                <Text className="font-sans text-[#006c50] text-[12px] font-semibold tracking-[0.24px] leading-[16px]">
                   Kembali ke halaman masuk
                 </Text>
               </TouchableOpacity>
@@ -344,7 +344,7 @@ export default function ResetPasswordScreen() {
               size={12}
               color="rgba(116,119,126,0.8)"
             />
-            <Text className="text-[rgba(116,119,126,0.8)] text-[11px] font-normal leading-[16.5px]">
+            <Text className="font-sans text-[rgba(116,119,126,0.8)] text-[11px] font-normal leading-[16.5px]">
               Datamu disimpan dengan aman
             </Text>
           </View>

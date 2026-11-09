@@ -18,7 +18,7 @@ export function PasswordRequirements({
 }: PasswordRequirementsProps) {
   return (
     <View className="gap-1 border-t border-[#f1f5f9] pt-[5px]">
-      <Text className="text-[#74777e] text-[11px] font-medium leading-[16.5px]">
+      <Text className="font-sans text-[#74777e] text-[11px] font-medium leading-[16.5px]">
         {title}
       </Text>
       <View className="flex-row flex-wrap gap-y-[6px]">
@@ -39,7 +39,7 @@ export function PasswordRequirements({
               )}
             </View>
             <Text
-              className={`text-[10px] font-normal leading-[15px] ${
+              className={`font-sans text-[10px] font-normal leading-[15px] ${
                 item.met ? "text-[#006c50]" : "text-[#74777e]"
               }`}
             >

@@ -108,15 +108,15 @@ export default function RegisterSuccessScreen() {
             <View className="items-center pt-[19px] pb-2">
               <Text
                 accessibilityRole="header"
-                className="text-[#001d37] text-[22px] font-bold leading-[27.5px] text-center"
+                className="font-sans text-[#001d37] text-[22px] font-bold leading-[27.5px] text-center"
               >
                 Akun Berhasil Dibuat!
               </Text>
             </View>
 
-            <Text className="text-[#43474d] text-[13px] font-normal leading-[21px] text-center">
+            <Text className="font-sans text-[#43474d] text-[13px] font-normal leading-[21px] text-center">
               Selamat datang di Cashify,{" "}
-              <Text className="text-[#001d37] font-semibold">{firstName}</Text>.
+              <Text className="font-sans text-[#001d37] font-semibold">{firstName}</Text>.
               Kamu akan otomatis masuk ke akunmu. Lanjutkan untuk mengatur
               keuanganmu.
             </Text>
@@ -139,7 +139,7 @@ export default function RegisterSuccessScreen() {
                 <ActivityIndicator size="small" color="#ffffff" />
               ) : (
                 <>
-                  <Text className="text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
+                  <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
                     Lanjutkan
                   </Text>
                   <Ionicons name="arrow-forward" size={14} color="#ffffff" />
@@ -156,7 +156,7 @@ export default function RegisterSuccessScreen() {
             size={12}
             color="rgba(116,119,126,0.8)"
           />
-          <Text className="text-[rgba(116,119,126,0.8)] text-[11px] font-normal leading-[16.5px]">
+          <Text className="font-sans text-[rgba(116,119,126,0.8)] text-[11px] font-normal leading-[16.5px]">
             Datamu disimpan dengan aman
           </Text>
         </View>

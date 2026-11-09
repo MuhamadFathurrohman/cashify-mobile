@@ -53,7 +53,7 @@ export function SplashScreen() {
             style={{ width: 99, height: 31 }}
             resizeMode="contain"
           />
-          <Text className="text-[#43474d] text-[14px] text-center mt-2 font-normal">
+          <Text className="font-sans text-[#43474d] text-[14px] text-center mt-2 font-normal">
             Kelola Keuangan, Capai Tujuan.
           </Text>
         </View>

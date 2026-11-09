@@ -74,19 +74,19 @@ function SummaryTile({
         >
           <Ionicons name={icon} size={12} color={color} />
         </View>
-        <Text className="ml-[6px] text-[10px] font-semibold leading-[14px] tracking-[0.4px] text-[#e2e8f0]">
+        <Text className="font-sans ml-[6px] text-[10px] font-semibold leading-[14px] tracking-[0.4px] text-[#e2e8f0]">
           {label}
         </Text>
       </View>
       <Text
-        className="mt-[6px] text-base font-semibold leading-[22px] tracking-[-0.4px]"
+        className="font-sans mt-[6px] text-base font-semibold leading-[22px] tracking-[-0.4px]"
         style={{ color }}
         numberOfLines={1}
         adjustsFontSizeToFit
       >
         {amount}
       </Text>
-      <Text className="mt-[2px] text-[10px] leading-[14px] text-[#829aba]">
+      <Text className="font-sans mt-[2px] text-[10px] leading-[14px] text-[#829aba]">
         Bulan ini
       </Text>
     </View>
@@ -125,12 +125,12 @@ export function BalanceCard({ balance, income, expense }: BalanceCardProps) {
         position={{ bottom: -32, left: -32 }}
       />
 
-      <Text className="text-xs leading-4 tracking-[0.3px] text-[#829aba]">
+      <Text className="font-sans text-xs leading-4 tracking-[0.3px] text-[#829aba]">
         Total Saldo Akun
       </Text>
       <View className="mt-2 flex-row items-center">
         <Text
-          className="text-[32px] font-bold leading-[38px] tracking-[-0.8px]"
+          className="font-sans text-[32px] font-bold leading-[38px] tracking-[-0.8px]"
           style={{
             color: balance < 0 && !hidden ? EXPENSE_COLOR : "#ffffff",
             flexShrink: 1,

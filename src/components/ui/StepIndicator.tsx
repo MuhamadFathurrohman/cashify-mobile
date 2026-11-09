@@ -11,7 +11,7 @@ export function StepIndicator({ step, total = 2 }: StepIndicatorProps) {
 
   return (
     <View className="items-center" accessible accessibilityLabel={label}>
-      <Text className="text-[#74777e] text-[11px] font-normal tracking-[0.275px] leading-[16.5px]">
+      <Text className="font-sans text-[#74777e] text-[11px] font-normal tracking-[0.275px] leading-[16.5px]">
         {label}
       </Text>
       {/* Lebar grup tetap 112; segmen flex-1 agar jumlah langkah bebas */}

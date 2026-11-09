@@ -117,7 +117,7 @@ export default function InitialBalanceScreen() {
           {/* Pengganti tombol kembali: menjaga posisi judul tetap sama */}
           <View className="w-[22px]" />
 
-          <Text className="text-[#001d37] text-[16px] font-semibold tracking-[-0.4px] leading-[24px]">
+          <Text className="font-sans text-[#001d37] text-[16px] font-semibold tracking-[-0.4px] leading-[24px]">
             Pengaturan Awal
           </Text>
 
@@ -127,7 +127,7 @@ export default function InitialBalanceScreen() {
             disabled={isPending}
             accessibilityRole="button"
           >
-            <Text className="text-[#74777e] text-[12px] font-normal leading-[18px]">
+            <Text className="font-sans text-[#74777e] text-[12px] font-normal leading-[18px]">
               Lewati
             </Text>
           </TouchableOpacity>
@@ -153,14 +153,14 @@ export default function InitialBalanceScreen() {
             }}
           >
             {/* Label */}
-            <Text className="text-[#001d37] text-[12px] font-semibold leading-[18px] pb-[12px]">
+            <Text className="font-sans text-[#001d37] text-[12px] font-semibold leading-[18px] pb-[12px]">
               Saldo Awal Akun
             </Text>
 
             {/* Input nominal besar */}
             <View className="items-center pb-[4px]">
               <View className="flex-row items-baseline gap-[6px]">
-                <Text className="text-[#001d37] text-[28px] font-bold tracking-[-0.7px] leading-[42px]">
+                <Text className="font-sans text-[#001d37] text-[28px] font-bold tracking-[-0.7px] leading-[42px]">
                   Rp
                 </Text>
                 <TextInput
@@ -171,7 +171,7 @@ export default function InitialBalanceScreen() {
                   keyboardType="numeric"
                   placeholder="0"
                   placeholderTextColor="rgba(116,119,126,0.5)"
-                  className="text-[#001d37] text-[32px] font-bold tracking-[-0.8px] leading-[48px] min-w-[60px]"
+                  className="font-sans text-[#001d37] text-[32px] font-bold tracking-[-0.8px] leading-[48px] min-w-[60px]"
                   style={{ padding: 0 }}
                   underlineColorAndroid="transparent"
                   maxLength={13}
@@ -190,7 +190,7 @@ export default function InitialBalanceScreen() {
             </View>
 
             {/* Hint */}
-            <Text className="text-[#74777e] text-[11px] font-normal leading-[17px] text-center pt-[10px] pb-[14px]">
+            <Text className="font-sans text-[#74777e] text-[11px] font-normal leading-[17px] text-center pt-[10px] pb-[14px]">
               Total semua saldo: rekening bank, dompet, dan uang tunai.
             </Text>
 
@@ -217,7 +217,7 @@ export default function InitialBalanceScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={`Tambah ${formatPreset(amount)}`}
                 >
-                  <Text className="text-[#43474d] text-[11px] font-medium leading-[16.5px]">
+                  <Text className="font-sans text-[#43474d] text-[11px] font-medium leading-[16.5px]">
                     {formatPreset(amount)}
                   </Text>
                 </TouchableOpacity>
@@ -230,7 +230,7 @@ export default function InitialBalanceScreen() {
 
           {/* ── Bottom area ── */}
           <View className="gap-[10px] items-center pb-2">
-            <Text className="text-[#74777e] text-[11px] font-normal leading-[16.5px]">
+            <Text className="font-sans text-[#74777e] text-[11px] font-normal leading-[16.5px]">
               Bisa diubah kapan saja di pengaturan profil.
             </Text>
 
@@ -251,7 +251,7 @@ export default function InitialBalanceScreen() {
               {isPending ? (
                 <ActivityIndicator size="small" color="#ffffff" />
               ) : (
-                <Text className="text-white text-[16px] font-semibold tracking-[-0.16px] leading-[24px]">
+                <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[24px]">
                   Lanjutkan
                 </Text>
               )}

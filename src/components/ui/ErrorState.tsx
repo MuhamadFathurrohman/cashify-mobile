@@ -25,10 +25,10 @@ export function ErrorState({
       >
         <Ionicons name="cloud-offline-outline" size={26} color="#ed7658" />
       </View>
-      <Text className="mt-4 text-center text-base font-semibold text-[#121c2a]">
+      <Text className="font-sans mt-4 text-center text-base font-semibold text-[#121c2a]">
         {title}
       </Text>
-      <Text className="mt-1 text-center text-sm leading-5 text-[#43474d]">
+      <Text className="font-sans mt-1 text-center text-sm leading-5 text-[#43474d]">
         {message}
       </Text>
       <Pressable
@@ -40,7 +40,7 @@ export function ErrorState({
         className="mt-5 rounded-full px-6 py-[10px]"
         style={{ backgroundColor: retrying ? "#7aa89c" : "#006c50" }}
       >
-        <Text className="text-sm font-semibold text-white">
+        <Text className="font-sans text-sm font-semibold text-white">
           {retrying ? "Memuat…" : "Coba Lagi"}
         </Text>
       </Pressable>

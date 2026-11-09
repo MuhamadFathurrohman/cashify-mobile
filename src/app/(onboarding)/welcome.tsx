@@ -84,10 +84,10 @@ export default function WelcomeScreen() {
         {/* ── Greeting + Feature card ── */}
         <View className="gap-6">
           <View className="items-center gap-2 px-1">
-            <Text className="text-[#001d37] text-[24px] font-bold leading-[32px] tracking-[-0.6px] text-center">
+            <Text className="font-sans text-[#001d37] text-[24px] font-bold leading-[32px] tracking-[-0.6px] text-center">
               Halo! 👋
             </Text>
-            <Text className="text-[#43474d] text-[14px] font-normal leading-[20px] text-center">
+            <Text className="font-sans text-[#43474d] text-[14px] font-normal leading-[20px] text-center">
               Yuk, kendalikan keuanganmu.
             </Text>
           </View>
@@ -109,7 +109,7 @@ export default function WelcomeScreen() {
               <View key={f.icon}>
                 <View className="flex-row items-center gap-3 py-[10px]">
                   <Ionicons name={f.icon} size={20} color="#006c50" />
-                  <Text className="text-[#43474d] text-[14px] font-normal leading-[20px] flex-1">
+                  <Text className="font-sans text-[#43474d] text-[14px] font-normal leading-[20px] flex-1">
                     {f.label}
                   </Text>
                 </View>
@@ -142,7 +142,7 @@ export default function WelcomeScreen() {
             activeOpacity={0.85}
             accessibilityRole="button"
           >
-            <Text className="text-white text-[16px] font-semibold tracking-[-0.16px] leading-[24px]">
+            <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[24px]">
               Mulai Sekarang
             </Text>
           </TouchableOpacity>

@@ -20,7 +20,7 @@ export function HomeHeader() {
         >
           <Ionicons name="wallet" size={22} color="#ffffff" />
         </View>
-        <Text className="ml-2 text-xl font-bold tracking-[-0.4px] text-[#006c50]">
+        <Text className="font-sans ml-2 text-xl font-bold tracking-[-0.4px] text-[#006c50]">
           Cashify
         </Text>
       </View>

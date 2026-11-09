@@ -65,7 +65,7 @@ export function SegmentedControl<T extends string>({
             {option.icon ? (
               <Ionicons name={option.icon} size={14} color={color} />
             ) : null}
-            <Text
+            <Text className="font-sans"
               style={{
                 fontSize: 12,
                 lineHeight: 16,

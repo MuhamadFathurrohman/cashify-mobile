@@ -91,7 +91,7 @@ export function FloatingInput({
       <Animated.View style={[labelAnimatedStyle, { height: 18 }]}>
         <Text
           style={{ color: labelColor }}
-          className="text-[12px] font-semibold tracking-[0.24px] leading-[16px] pl-[2px]"
+          className="font-sans text-[12px] font-semibold tracking-[0.24px] leading-[16px] pl-[2px]"
         >
           {label}
         </Text>
@@ -104,7 +104,7 @@ export function FloatingInput({
       >
         <TextInput
           ref={ref}
-          className={`h-full text-[14px] text-[#001d37] font-normal px-[16px] ${
+          className={`font-sans h-full text-[14px] text-[#001d37] font-normal px-[16px] ${
             secureTextEntry ? "pr-[48px]" : "pr-[16px]"
           }`}
           placeholder={
@@ -143,7 +143,7 @@ export function FloatingInput({
 
       {/* Pesan error */}
       {error && (
-        <Text className="text-red-500 text-[11px] leading-[14px] pl-[4px]">
+        <Text className="font-sans text-red-500 text-[11px] leading-[14px] pl-[4px]">
           {error}
         </Text>
       )}

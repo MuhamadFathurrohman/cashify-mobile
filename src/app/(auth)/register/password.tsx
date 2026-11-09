@@ -133,10 +133,10 @@ export default function RegisterPasswordScreen() {
               <StepIndicator step={2} />
             </View>
             <View className="items-center gap-[3px] pt-[13px] pb-5">
-              <Text className="text-[#001d37] text-[22px] font-bold leading-[27.5px] text-center">
+              <Text className="font-sans text-[#001d37] text-[22px] font-bold leading-[27.5px] text-center">
                 Buat Kata Sandi
               </Text>
-              <Text className="text-[#74777e] text-[13px] font-normal leading-[19.5px] text-center max-w-[270px]">
+              <Text className="font-sans text-[#74777e] text-[13px] font-normal leading-[19.5px] text-center max-w-[270px]">
                 Gunakan kombinasi yang kuat untuk melindungi akunmu.
               </Text>
             </View>
@@ -210,7 +210,7 @@ export default function RegisterPasswordScreen() {
                       size={13}
                       color="#006c50"
                     />
-                    <Text className="text-[#006c50] text-[11px] font-normal leading-[16.5px]">
+                    <Text className="font-sans text-[#006c50] text-[11px] font-normal leading-[16.5px]">
                       Kata sandi cocok
                     </Text>
                   </View>
@@ -238,7 +238,7 @@ export default function RegisterPasswordScreen() {
               {isPending ? (
                 <ActivityIndicator size="small" color="#ffffff" />
               ) : (
-                <Text className="text-white text-[16px] font-semibold leading-[24px]">
+                <Text className="font-sans text-white text-[16px] font-semibold leading-[24px]">
                   Daftar
                 </Text>
               )}
@@ -252,7 +252,7 @@ export default function RegisterPasswordScreen() {
                 accessibilityRole="button"
               >
                 <Ionicons name="arrow-back" size={18} color="#001d37" />
-                <Text className="text-[#74777e] text-[12px] font-normal leading-[18px]">
+                <Text className="font-sans text-[#74777e] text-[12px] font-normal leading-[18px]">
                   Kembali ke langkah sebelumnya
                 </Text>
               </TouchableOpacity>
@@ -266,7 +266,7 @@ export default function RegisterPasswordScreen() {
               size={12}
               color="rgba(116,119,126,0.8)"
             />
-            <Text className="text-[rgba(116,119,126,0.8)] text-[11px] font-normal leading-[16.5px]">
+            <Text className="font-sans text-[rgba(116,119,126,0.8)] text-[11px] font-normal leading-[16.5px]">
               Datamu disimpan dengan aman
             </Text>
           </View>

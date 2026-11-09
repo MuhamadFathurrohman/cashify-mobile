@@ -95,10 +95,10 @@ export default function HomeScreen() {
         }
       >
         <View>
-          <Text className="text-2xl font-bold leading-[30px] tracking-[-0.6px] text-[#001d37]">
+          <Text className="font-sans text-2xl font-bold leading-[30px] tracking-[-0.6px] text-[#001d37]">
             {firstName ? `Halo, ${firstName}! 👋` : "Halo! 👋"}
           </Text>
-          <Text className="pt-[2px] text-sm leading-5 text-[#43474d]">
+          <Text className="font-sans pt-[2px] text-sm leading-5 text-[#43474d]">
             Kelola Keuangan, Capai Tujuan.
           </Text>
         </View>

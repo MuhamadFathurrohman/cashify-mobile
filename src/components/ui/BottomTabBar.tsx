@@ -165,8 +165,8 @@ export function BottomTabBar({ state, onAddPress }: BottomTabBarProps) {
         <Text
           className={
             focused
-              ? "mt-1 text-center text-[10px] font-bold leading-[15px] text-[#34d399]"
-              : "mt-1 text-center text-[10px] font-normal leading-[15px] text-[#94a3b8]"
+              ? "font-sans mt-1 text-center text-[10px] font-bold leading-[15px] text-[#34d399]"
+              : "font-sans mt-1 text-center text-[10px] font-normal leading-[15px] text-[#94a3b8]"
           }
         >
           {config.label}

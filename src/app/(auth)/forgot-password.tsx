@@ -180,10 +180,10 @@ export default function ForgotPasswordScreen() {
             ) : (
               <>
                 <View className="w-full items-center gap-1 pb-5">
-                  <Text className="text-[#001d37] text-[20px] font-semibold leading-[26px] tracking-[-0.3px] text-center">
+                  <Text className="font-sans text-[#001d37] text-[20px] font-semibold leading-[26px] tracking-[-0.3px] text-center">
                     Lupa Kata Sandi?
                   </Text>
-                  <Text className="text-[#43474d] text-[12px] font-normal leading-[18px] text-center max-w-[290px]">
+                  <Text className="font-sans text-[#43474d] text-[12px] font-normal leading-[18px] text-center max-w-[290px]">
                     Masukkan email terdaftar. Kami akan mengirimkan tautan untuk
                     mereset kata sandimu.
                   </Text>
@@ -227,7 +227,7 @@ export default function ForgotPasswordScreen() {
                       <ActivityIndicator size="small" color="#ffffff" />
                     ) : (
                       <>
-                        <Text className="text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
+                        <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
                           Kirim Tautan Reset
                         </Text>
                         <Ionicons
@@ -251,7 +251,7 @@ export default function ForgotPasswordScreen() {
                 accessibilityRole="button"
               >
                 <Ionicons name="arrow-back" size={14} color="#006c50" />
-                <Text className="text-[#006c50] text-[12px] font-semibold tracking-[0.24px] leading-[16px]">
+                <Text className="font-sans text-[#006c50] text-[12px] font-semibold tracking-[0.24px] leading-[16px]">
                   Kembali ke halaman masuk
                 </Text>
               </TouchableOpacity>
@@ -265,7 +265,7 @@ export default function ForgotPasswordScreen() {
               size={12}
               color="rgba(116,119,126,0.8)"
             />
-            <Text className="text-[rgba(116,119,126,0.8)] text-[11px] font-normal leading-[16.5px]">
+            <Text className="font-sans text-[rgba(116,119,126,0.8)] text-[11px] font-normal leading-[16.5px]">
               Datamu disimpan dengan aman
             </Text>
           </View>

@@ -17,10 +17,10 @@ export function ComingSoon({ icon, title, description }: ComingSoonProps) {
       <View className="h-[72px] w-[72px] items-center justify-center rounded-full bg-[#dee9fc]">
         <Ionicons name={icon} size={32} color="#001d37" />
       </View>
-      <Text className="mt-5 text-center text-[20px] font-bold leading-[25px] tracking-[-0.5px] text-[#001d37]">
+      <Text className="font-sans mt-5 text-center text-[20px] font-bold leading-[25px] tracking-[-0.5px] text-[#001d37]">
         {title}
       </Text>
-      <Text className="mt-2 text-center text-[13px] font-normal leading-[21px] text-[#74777e]">
+      <Text className="font-sans mt-2 text-center text-[13px] font-normal leading-[21px] text-[#74777e]">
         {description}
       </Text>
     </View>

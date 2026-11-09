@@ -40,7 +40,7 @@ export default function AnalysisScreen() {
         className="gap-4 border-b border-[#f1f5f9] px-5 pb-[13px]"
         style={{ paddingTop: insets.top + 16 }}
       >
-        <Text className="text-[18px] font-bold leading-[25px] tracking-[-0.45px] text-[#0f172a]">
+        <Text className="font-sans text-[18px] font-bold leading-[25px] tracking-[-0.45px] text-[#0f172a]">
           Analisis Keuangan
         </Text>
         <SegmentedControl options={TABS} value={tab} onChange={setTab} />

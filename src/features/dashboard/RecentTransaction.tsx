@@ -51,19 +51,19 @@ function TransactionRow({ item }: { item: DashboardTransaction }) {
         </View>
         <View className="ml-3 flex-1">
           <Text
-            className="text-base font-semibold leading-5 tracking-[-0.16px] text-[#121c2a]"
+            className="font-sans text-base font-semibold leading-5 tracking-[-0.16px] text-[#121c2a]"
             numberOfLines={1}
           >
             {description || item.category.name}
           </Text>
-          <Text className="text-xs leading-4 text-[#74777e]" numberOfLines={1}>
+          <Text className="font-sans text-xs leading-4 text-[#74777e]" numberOfLines={1}>
             {description ? `${item.category.name} • ${date}` : date}
           </Text>
         </View>
       </View>
       <View className="items-end pl-3">
         <Text
-          className="text-base font-semibold leading-[22px] tracking-[-0.16px]"
+          className="font-sans text-base font-semibold leading-[22px] tracking-[-0.16px]"
           style={{ color }}
         >
           {isIncome ? formatIncome(item.amount) : formatExpense(item.amount)}
@@ -77,7 +77,7 @@ function TransactionRow({ item }: { item: DashboardTransaction }) {
           }}
         >
           <Text
-            className="text-[10px] font-semibold leading-[14px] tracking-[0.4px]"
+            className="font-sans text-[10px] font-semibold leading-[14px] tracking-[0.4px]"
             style={{ color }}
           >
             {isIncome ? "Masuk" : "Keluar"}
@@ -98,10 +98,10 @@ function EmptyTransactions({ onAdd }: { onAdd: () => void }) {
       >
         <Ionicons name="receipt-outline" size={22} color={INCOME_COLOR} />
       </View>
-      <Text className="mt-3 text-base font-semibold text-[#121c2a]">
+      <Text className="font-sans mt-3 text-base font-semibold text-[#121c2a]">
         Belum ada transaksi
       </Text>
-      <Text className="mt-1 text-center text-xs leading-4 text-[#74777e]">
+      <Text className="font-sans mt-1 text-center text-xs leading-4 text-[#74777e]">
         Catat pemasukan atau pengeluaran pertamamu supaya ringkasan keuangan
         mulai terisi.
       </Text>
@@ -114,7 +114,7 @@ function EmptyTransactions({ onAdd }: { onAdd: () => void }) {
         className="mt-4 rounded-full px-5 py-[10px]"
         style={{ backgroundColor: INCOME_COLOR }}
       >
-        <Text className="text-sm font-semibold text-white">
+        <Text className="font-sans text-sm font-semibold text-white">
           Catat Transaksi
         </Text>
       </Pressable>
@@ -132,7 +132,7 @@ export function RecentTransactions({
   return (
     <View className="gap-3 pt-1">
       <View className="flex-row items-center justify-between">
-        <Text className="text-base font-semibold leading-[22px] tracking-[-0.16px] text-[#121c2a]">
+        <Text className="font-sans text-base font-semibold leading-[22px] tracking-[-0.16px] text-[#121c2a]">
           Transaksi Terbaru
         </Text>
         {isEmpty ? null : (
@@ -143,7 +143,7 @@ export function RecentTransactions({
             hitSlop={8}
             className="flex-row items-center gap-[2px]"
           >
-            <Text className="text-xs font-semibold leading-4 tracking-[0.24px] text-[#001d37]">
+            <Text className="font-sans text-xs font-semibold leading-4 tracking-[0.24px] text-[#001d37]">
               Lihat Semua
             </Text>
             <Ionicons name="chevron-forward" size={12} color="#001d37" />

@@ -47,10 +47,10 @@ export default function UnavailableScreen() {
 
           {/* Teks */}
           <View className="w-full items-center gap-2">
-            <Text className="text-[#001d37] text-[20px] font-semibold leading-[26px] tracking-[-0.3px] text-center">
+            <Text className="font-sans text-[#001d37] text-[20px] font-semibold leading-[26px] tracking-[-0.3px] text-center">
               Tidak Ada Koneksi
             </Text>
-            <Text className="text-[#43474d] text-[12px] font-normal leading-[18px] text-center">
+            <Text className="font-sans text-[#43474d] text-[12px] font-normal leading-[18px] text-center">
               Periksa koneksi internetmu dan coba lagi.
             </Text>
           </View>
@@ -72,7 +72,7 @@ export default function UnavailableScreen() {
             {isRetrying ? (
               <ActivityIndicator size="small" color="#ffffff" />
             ) : (
-              <Text className="text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
+              <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
                 Coba Lagi
               </Text>
             )}

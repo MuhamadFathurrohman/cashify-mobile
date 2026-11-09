@@ -25,7 +25,7 @@ export default function ProfileScreen() {
           {isPending ? (
             <ActivityIndicator size="small" color="#f87171" />
           ) : (
-            <Text className="text-[16px] font-semibold leading-[24px] text-[#f87171]">
+            <Text className="font-sans text-[16px] font-semibold leading-[24px] text-[#f87171]">
               Keluar
             </Text>
           )}

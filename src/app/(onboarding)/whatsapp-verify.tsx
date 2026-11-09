@@ -83,7 +83,7 @@ function OtpInput({ value, onChange, hasError, editable }: OtpInputProps) {
                 justifyContent: "center",
               }}
             >
-              <Text
+              <Text className="font-sans"
                 style={{
                   fontSize: 22,
                   fontWeight: "700",
@@ -99,7 +99,7 @@ function OtpInput({ value, onChange, hasError, editable }: OtpInputProps) {
       </View>
 
       {/* Input tersembunyi — menangkap keyboard */}
-      <TextInput
+      <TextInput className="font-sans"
         ref={inputRef}
         value={value}
         onChangeText={(text) => {
@@ -273,7 +273,7 @@ export default function WhatsAppVerifyScreen() {
           >
             <Ionicons name="arrow-back" size={22} color="#001d37" />
           </TouchableOpacity>
-          <Text className="text-[#001d37] text-[16px] font-semibold tracking-[-0.08px] leading-[24px]">
+          <Text className="font-sans text-[#001d37] text-[16px] font-semibold tracking-[-0.08px] leading-[24px]">
             Verifikasi WhatsApp
           </Text>
           {/* Spacer agar judul tetap tengah */}
@@ -303,11 +303,11 @@ export default function WhatsAppVerifyScreen() {
 
             {/* Teks */}
             <View className="items-center pt-5 pb-2">
-              <Text className="text-[#001d37] text-[22px] font-bold leading-[27.5px] text-center">
+              <Text className="font-sans text-[#001d37] text-[22px] font-bold leading-[27.5px] text-center">
                 WhatsApp Terhubung!
               </Text>
             </View>
-            <Text className="text-[#43474d] text-[13px] font-normal leading-[21px] text-center pb-5">
+            <Text className="font-sans text-[#43474d] text-[13px] font-normal leading-[21px] text-center pb-5">
               Mulai kirim pesan ke bot Cashify untuk mencatat transaksimu kapan
               saja.
             </Text>
@@ -320,7 +320,7 @@ export default function WhatsAppVerifyScreen() {
 
             {/* Info nomor bot */}
             <View className="w-full items-center gap-1 pb-5">
-              <Text className="text-[#74777e] text-[11px] font-normal leading-[16px]">
+              <Text className="font-sans text-[#74777e] text-[11px] font-normal leading-[16px]">
                 Nomor bot Cashify
               </Text>
               <View
@@ -328,7 +328,7 @@ export default function WhatsAppVerifyScreen() {
                 style={{ backgroundColor: "rgba(127,249,204,0.15)" }}
               >
                 <Ionicons name="logo-whatsapp" size={14} color="#006c50" />
-                <Text className="text-[#006c50] text-[13px] font-semibold leading-[19px]">
+                <Text className="font-sans text-[#006c50] text-[13px] font-semibold leading-[19px]">
                   {BOT_WA_NUMBER.replace(/^62/, "+62 ")}
                 </Text>
               </View>
@@ -349,7 +349,7 @@ export default function WhatsAppVerifyScreen() {
               accessibilityRole="button"
             >
               <Ionicons name="logo-whatsapp" size={18} color="#ffffff" />
-              <Text className="text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
+              <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
                 Buka WhatsApp
               </Text>
             </TouchableOpacity>
@@ -365,7 +365,7 @@ export default function WhatsAppVerifyScreen() {
               {isFinishing ? (
                 <ActivityIndicator size="small" color="#74777e" />
               ) : (
-                <Text className="text-[#74777e] text-[12px] font-normal leading-[18px] text-center">
+                <Text className="font-sans text-[#74777e] text-[12px] font-normal leading-[18px] text-center">
                   Lanjut ke Cashify
                 </Text>
               )}
@@ -399,7 +399,7 @@ export default function WhatsAppVerifyScreen() {
         >
           <Ionicons name="arrow-back" size={22} color="#001d37" />
         </TouchableOpacity>
-        <Text className="text-[#001d37] text-[16px] font-semibold tracking-[-0.08px] leading-[24px]">
+        <Text className="font-sans text-[#001d37] text-[16px] font-semibold tracking-[-0.08px] leading-[24px]">
           Verifikasi WhatsApp
         </Text>
         {/* Spacer agar judul tetap tengah */}
@@ -422,12 +422,12 @@ export default function WhatsAppVerifyScreen() {
         >
           {/* Heading */}
           <View className="items-center gap-[6px]">
-            <Text className="text-[#001d37] text-[20px] font-bold tracking-[-0.5px] leading-[25px] text-center">
+            <Text className="font-sans text-[#001d37] text-[20px] font-bold tracking-[-0.5px] leading-[25px] text-center">
               Masukkan Kode OTP
             </Text>
-            <Text className="text-[#74777e] text-[13px] font-normal leading-[20px] text-center">
+            <Text className="font-sans text-[#74777e] text-[13px] font-normal leading-[20px] text-center">
               Kode 6 digit dikirim ke WhatsApp{"\n"}
-              <Text className="text-[#001d37] font-semibold">
+              <Text className="font-sans text-[#001d37] font-semibold">
                 {phoneDisplay}
               </Text>
             </Text>
@@ -449,7 +449,7 @@ export default function WhatsAppVerifyScreen() {
 
           {/* Error atau spacer */}
           {otpError ? (
-            <Text className="text-red-500 text-[12px] leading-[16px] text-center -mt-2">
+            <Text className="font-sans text-red-500 text-[12px] leading-[16px] text-center -mt-2">
               {otpError}
             </Text>
           ) : (
@@ -459,9 +459,9 @@ export default function WhatsAppVerifyScreen() {
           {/* Kirim ulang */}
           <View className="items-center">
             {cooldown > 0 ? (
-              <Text className="text-[#74777e] text-[12px] font-normal leading-[18px]">
+              <Text className="font-sans text-[#74777e] text-[12px] font-normal leading-[18px]">
                 Kirim ulang dalam{" "}
-                <Text className="text-[#001d37] font-semibold">
+                <Text className="font-sans text-[#001d37] font-semibold">
                   {formatCountdown(cooldown)}
                 </Text>
               </Text>
@@ -475,7 +475,7 @@ export default function WhatsAppVerifyScreen() {
                 {isResending ? (
                   <ActivityIndicator size="small" color="#006c50" />
                 ) : (
-                  <Text className="text-[#006c50] text-[12px] font-semibold leading-[18px]">
+                  <Text className="font-sans text-[#006c50] text-[12px] font-semibold leading-[18px]">
                     Kirim ulang kode
                   </Text>
                 )}
@@ -507,7 +507,7 @@ export default function WhatsAppVerifyScreen() {
             {isVerifying ? (
               <ActivityIndicator size="small" color="#ffffff" />
             ) : (
-              <Text className="text-white text-[16px] font-semibold tracking-[-0.16px] leading-[24px]">
+              <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[24px]">
                 Verifikasi
               </Text>
             )}
@@ -520,7 +520,7 @@ export default function WhatsAppVerifyScreen() {
               size={12}
               color="rgba(116,119,126,0.8)"
             />
-            <Text className="text-[rgba(116,119,126,0.8)] text-[11px] font-normal leading-[16.5px]">
+            <Text className="font-sans text-[rgba(116,119,126,0.8)] text-[11px] font-normal leading-[16.5px]">
               Kode hanya berlaku sekali dan akan kedaluwarsa
             </Text>
           </View>

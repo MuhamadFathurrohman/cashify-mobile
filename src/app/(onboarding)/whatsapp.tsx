@@ -150,7 +150,7 @@ export default function OnboardingWhatsAppScreen() {
           {/* Pengganti tombol kembali: layar ini bisa menjadi layar pertama tanpa riwayat */}
           <View className="w-[22px]" />
 
-          <Text className="text-[#001d37] text-[16px] font-semibold tracking-[-0.08px] leading-[24px]">
+          <Text className="font-sans text-[#001d37] text-[16px] font-semibold tracking-[-0.08px] leading-[24px]">
             Pengaturan Awal
           </Text>
 
@@ -160,7 +160,7 @@ export default function OnboardingWhatsAppScreen() {
             disabled={isBusy}
             accessibilityRole="button"
           >
-            <Text className="text-[#74777e] text-[12px] font-normal leading-[18px]">
+            <Text className="font-sans text-[#74777e] text-[12px] font-normal leading-[18px]">
               Lewati
             </Text>
           </TouchableOpacity>
@@ -195,11 +195,11 @@ export default function OnboardingWhatsAppScreen() {
                 <View className="h-[64px] w-[64px] items-center justify-center rounded-full bg-[#006c50]">
                   <Ionicons name="checkmark" size={32} color="#ffffff" />
                 </View>
-                <Text className="text-[#001d37] text-[20px] font-bold tracking-[-0.5px] leading-[25px] text-center">
+                <Text className="font-sans text-[#001d37] text-[20px] font-bold tracking-[-0.5px] leading-[25px] text-center">
                   WhatsApp Sudah Terhubung
                 </Text>
                 {linkStatus?.masked_phone ? (
-                  <Text className="text-[#74777e] text-[13px] font-normal leading-[21px] text-center">
+                  <Text className="font-sans text-[#74777e] text-[13px] font-normal leading-[21px] text-center">
                     {linkStatus.masked_phone} sudah tertaut ke akunmu.
                   </Text>
                 ) : null}
@@ -218,7 +218,7 @@ export default function OnboardingWhatsAppScreen() {
                   {isFinishing ? (
                     <ActivityIndicator size="small" color="#ffffff" />
                   ) : (
-                    <Text className="text-white text-[15px] font-semibold leading-[22.5px]">
+                    <Text className="font-sans text-white text-[15px] font-semibold leading-[22.5px]">
                       Lanjut ke Cashify
                     </Text>
                   )}
@@ -242,10 +242,10 @@ export default function OnboardingWhatsAppScreen() {
               >
                 {/* Judul & deskripsi */}
                 <View className="gap-[5px]">
-                  <Text className="text-[#001d37] text-[20px] font-bold tracking-[-0.5px] leading-[25px]">
+                  <Text className="font-sans text-[#001d37] text-[20px] font-bold tracking-[-0.5px] leading-[25px]">
                     Hubungkan WhatsApp
                   </Text>
-                  <Text className="text-[#74777e] text-[13px] font-normal leading-[21px]">
+                  <Text className="font-sans text-[#74777e] text-[13px] font-normal leading-[21px]">
                     Catat pengeluaran dan pemasukan langsung dari WhatsApp-mu.
                   </Text>
                 </View>
@@ -257,7 +257,7 @@ export default function OnboardingWhatsAppScreen() {
                 <View>
                   {FEATURES.map((feature, i) => (
                     <View key={feature}>
-                      <Text className="text-[#43474d] text-[13px] font-normal leading-[18px] py-[9px]">
+                      <Text className="font-sans text-[#43474d] text-[13px] font-normal leading-[18px] py-[9px]">
                         {feature}
                       </Text>
                       {i < FEATURES.length - 1 && (
@@ -274,7 +274,7 @@ export default function OnboardingWhatsAppScreen() {
 
                 {/* Input nomor */}
                 <View className="gap-2">
-                  <Text className="text-[#001d37] text-[12px] font-semibold tracking-[-0.3px] leading-[18px]">
+                  <Text className="font-sans text-[#001d37] text-[12px] font-semibold tracking-[-0.3px] leading-[18px]">
                     Nomor WhatsApp
                   </Text>
 
@@ -284,7 +284,7 @@ export default function OnboardingWhatsAppScreen() {
                       className="h-[50px] px-[14px] items-center justify-center rounded-[12px]"
                       style={{ backgroundColor: "#dee9fc" }}
                     >
-                      <Text className="text-[#001d37] text-[14px] font-medium leading-[21px]">
+                      <Text className="font-sans text-[#001d37] text-[14px] font-medium leading-[21px]">
                         +62
                       </Text>
                     </View>
@@ -303,7 +303,7 @@ export default function OnboardingWhatsAppScreen() {
                         keyboardType="phone-pad"
                         placeholder="8xx-xxxx-xxxx"
                         placeholderTextColor="rgba(116,119,126,0.7)"
-                        className="text-[#001d37] text-[14px] font-normal leading-[21px]"
+                        className="font-sans text-[#001d37] text-[14px] font-normal leading-[21px]"
                         style={{ padding: 0 }}
                         underlineColorAndroid="transparent"
                         editable={!isBusy}
@@ -314,11 +314,11 @@ export default function OnboardingWhatsAppScreen() {
                   </View>
 
                   {phoneError ? (
-                    <Text className="text-red-500 text-[11px] leading-[14px] pl-[4px]">
+                    <Text className="font-sans text-red-500 text-[11px] leading-[14px] pl-[4px]">
                       {phoneError}
                     </Text>
                   ) : (
-                    <Text className="text-[#74777e] text-[11px] font-normal leading-[16.5px]">
+                    <Text className="font-sans text-[#74777e] text-[11px] font-normal leading-[16.5px]">
                       Contoh: 0812-3456-7890
                     </Text>
                   )}
@@ -348,7 +348,7 @@ export default function OnboardingWhatsAppScreen() {
                   {isLinking ? (
                     <ActivityIndicator size="small" color="#ffffff" />
                   ) : (
-                    <Text className="text-white text-[15px] font-semibold leading-[22.5px]">
+                    <Text className="font-sans text-white text-[15px] font-semibold leading-[22.5px]">
                       Hubungkan WhatsApp
                     </Text>
                   )}
@@ -364,14 +364,14 @@ export default function OnboardingWhatsAppScreen() {
                   {isFinishing ? (
                     <ActivityIndicator size="small" color="#74777e" />
                   ) : (
-                    <Text className="text-[#74777e] text-[12px] font-normal leading-[18px] text-center">
+                    <Text className="font-sans text-[#74777e] text-[12px] font-normal leading-[18px] text-center">
                       Lewati, atur nanti
                     </Text>
                   )}
                 </TouchableOpacity>
 
                 {/* Privacy note */}
-                <Text className="text-[#74777e] text-[10px] font-normal leading-[12.5px] text-center px-6">
+                <Text className="font-sans text-[#74777e] text-[10px] font-normal leading-[12.5px] text-center px-6">
                   Nomormu tidak akan dibagikan ke pihak ketiga.
                 </Text>
               </View>

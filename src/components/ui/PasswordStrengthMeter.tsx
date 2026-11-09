@@ -58,12 +58,12 @@ export function PasswordStrengthMeter({
         ))}
       </View>
       <View className="flex-row items-center justify-between">
-        <Text className="text-[#74777e] text-[10px] font-normal leading-[15px]">
+        <Text className="font-sans text-[#74777e] text-[10px] font-normal leading-[15px]">
           Kekuatan kata sandi:
         </Text>
         {level && (
           <Text
-            className={`${level.textClass} text-[11px] font-medium leading-[16.5px]`}
+            className={`font-sans ${level.textClass} text-[11px] font-medium leading-[16.5px]`}
           >
             {level.label}
           </Text>

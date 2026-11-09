@@ -43,14 +43,14 @@ function ResendButton({
         ) : (
           <>
             <Ionicons name="refresh" size={16} color="#006c50" />
-            <Text className="text-[#006c50] text-[14px] font-semibold leading-[20px]">
+            <Text className="font-sans text-[#006c50] text-[14px] font-semibold leading-[20px]">
               Kirim Ulang
             </Text>
           </>
         )}
       </TouchableOpacity>
       {remaining > 0 && (
-        <Text className="text-[#74777e] text-[12px] font-normal leading-[18px]">
+        <Text className="font-sans text-[#74777e] text-[12px] font-normal leading-[18px]">
           Tersedia dalam {formatCountdown(remaining)}
         </Text>
       )}
@@ -81,18 +81,18 @@ export function ForgotPasswordSent({
       </View>
 
       <View className="items-center gap-2">
-        <Text className="text-[#001d37] text-[20px] font-semibold leading-[26px] text-center">
+        <Text className="font-sans text-[#001d37] text-[20px] font-semibold leading-[26px] text-center">
           Periksa Email Kamu
         </Text>
-        <Text className="text-[#43474d] text-[13px] font-normal leading-[20px] text-center">
-          Jika <Text className="text-[#001d37] font-semibold">{email}</Text>{" "}
+        <Text className="font-sans text-[#43474d] text-[13px] font-normal leading-[20px] text-center">
+          Jika <Text className="font-sans text-[#001d37] font-semibold">{email}</Text>{" "}
           terdaftar, kami akan mengirim tautan untuk mereset kata sandi.
         </Text>
       </View>
 
       <View className="w-full flex-row items-center gap-2 rounded-[12px] bg-[#dee9fc] px-8 py-3">
         <Ionicons name="information-circle-outline" size={16} color="#43474d" />
-        <Text className="flex-1 text-[#43474d] text-[12px] font-normal leading-[18px]">
+        <Text className="font-sans flex-1 text-[#43474d] text-[12px] font-normal leading-[18px]">
           Tidak menemukan email? Cek folder Spam
         </Text>
       </View>

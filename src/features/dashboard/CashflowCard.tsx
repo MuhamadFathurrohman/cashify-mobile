@@ -40,7 +40,7 @@ function LegendDot({ color, label }: { color: string; label: string }) {
         className="h-[10px] w-[10px] rounded-full"
         style={{ backgroundColor: color }}
       />
-      <Text className="ml-1 text-[10px] font-semibold leading-[14px] tracking-[0.4px] text-[#43474d]">
+      <Text className="font-sans ml-1 text-[10px] font-semibold leading-[14px] tracking-[0.4px] text-[#43474d]">
         {label}
       </Text>
     </View>
@@ -70,10 +70,10 @@ export function CashflowCard({
     >
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="text-base font-semibold leading-[22px] tracking-[-0.16px] text-[#121c2a]">
+          <Text className="font-sans text-base font-semibold leading-[22px] tracking-[-0.16px] text-[#121c2a]">
             Arus Kas Bulan Ini
           </Text>
-          <Text className="text-xs leading-4 text-[#43474d]">{monthLabel}</Text>
+          <Text className="font-sans text-xs leading-4 text-[#43474d]">{monthLabel}</Text>
         </View>
         <View className="flex-row items-center gap-3">
           <LegendDot color={INCOME_COLOR} label="Masuk" />
@@ -84,10 +84,10 @@ export function CashflowCard({
       {isEmpty ? (
         <View className="h-[144px] items-center justify-center px-4">
           <Ionicons name="bar-chart-outline" size={28} color="#c4c6ce" />
-          <Text className="mt-2 text-sm font-semibold text-[#43474d]">
+          <Text className="font-sans mt-2 text-sm font-semibold text-[#43474d]">
             Belum ada arus kas
           </Text>
-          <Text className="mt-1 text-center text-xs leading-4 text-[#74777e]">
+          <Text className="font-sans mt-1 text-center text-xs leading-4 text-[#74777e]">
             Transaksi bulan ini akan tampil di sini.
           </Text>
         </View>
@@ -117,8 +117,8 @@ export function CashflowCard({
                 <Text
                   className={
                     isCurrent
-                      ? "pt-2 text-[10px] font-bold leading-[14px] tracking-[0.4px] text-[#001d37]"
-                      : "pt-2 text-[10px] font-semibold leading-[14px] tracking-[0.4px] text-[#74777e]"
+                      ? "font-sans pt-2 text-[10px] font-bold leading-[14px] tracking-[0.4px] text-[#001d37]"
+                      : "font-sans pt-2 text-[10px] font-semibold leading-[14px] tracking-[0.4px] text-[#74777e]"
                   }
                 >
                   {bucket.label}

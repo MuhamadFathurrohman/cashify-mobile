@@ -64,7 +64,7 @@ export function CustomToast({
         {config.icon ? (
           <Ionicons name={config.icon} size={18} color="#ffffff" />
         ) : (
-          <Text className="text-[18px] font-extrabold leading-[22px] text-white">
+          <Text className="font-sans text-[18px] font-extrabold leading-[22px] text-white">
             !
           </Text>
         )}
@@ -72,11 +72,11 @@ export function CustomToast({
 
       {/* Teks: tanpa numberOfLines agar pesan terbaca penuh */}
       <View className="mr-1 flex-1">
-        <Text className="text-[13px] font-bold leading-[20px] tracking-[-0.3px] text-[#1e293b]">
+        <Text className="font-sans text-[13px] font-bold leading-[20px] tracking-[-0.3px] text-[#1e293b]">
           {title}
         </Text>
         {description ? (
-          <Text className="mt-0.5 text-[11px] font-normal leading-[17px] text-[#64748b]">
+          <Text className="font-sans mt-0.5 text-[11px] font-normal leading-[17px] text-[#64748b]">
             {description}
           </Text>
         ) : null}

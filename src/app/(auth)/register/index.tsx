@@ -103,10 +103,10 @@ export default function RegisterAccountScreen() {
             </View>
 
             <View className="items-center gap-[3px] pt-[13px] pb-5">
-              <Text className="text-[#001d37] text-[22px] font-bold leading-[27.5px] text-center">
+              <Text className="font-sans text-[#001d37] text-[22px] font-bold leading-[27.5px] text-center">
                 Buat Akun Baru
               </Text>
-              <Text className="text-[#74777e] text-[13px] font-normal leading-[19.5px] text-center">
+              <Text className="font-sans text-[#74777e] text-[13px] font-normal leading-[19.5px] text-center">
                 Mulai perjalanan finansialmu bersama Cashify.
               </Text>
             </View>
@@ -182,7 +182,7 @@ export default function RegisterAccountScreen() {
                 activeOpacity={0.85}
                 accessibilityRole="button"
               >
-                <Text className="text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
+                <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
                   Lanjutkan
                 </Text>
                 <Ionicons name="arrow-forward" size={14} color="#ffffff" />
@@ -192,7 +192,7 @@ export default function RegisterAccountScreen() {
             {/* Divider ATAU */}
             <View className="w-full flex-row items-center px-2 py-4">
               <View className="flex-1 h-px bg-[rgba(190,201,194,0.3)]" />
-              <Text className="px-3 text-[#74777e] text-[10px] font-semibold tracking-[0.5px] leading-[15px]">
+              <Text className="font-sans px-3 text-[#74777e] text-[10px] font-semibold tracking-[0.5px] leading-[15px]">
                 ATAU
               </Text>
               <View className="flex-1 h-px bg-[rgba(190,201,194,0.3)]" />
@@ -210,7 +210,7 @@ export default function RegisterAccountScreen() {
                 className="w-5 h-5"
                 resizeMode="contain"
               />
-              <Text className="text-[#001d37] text-[14px] font-medium tracking-[-0.16px] leading-[20px]">
+              <Text className="font-sans text-[#001d37] text-[14px] font-medium tracking-[-0.16px] leading-[20px]">
                 Daftar dengan Google
               </Text>
             </TouchableOpacity>
@@ -218,7 +218,7 @@ export default function RegisterAccountScreen() {
 
           {/* ── Footer ── */}
           <View className="w-full flex-row items-center justify-center pt-4 pb-2">
-            <Text className="text-[#43474d] text-[12px] font-normal leading-[18px]">
+            <Text className="font-sans text-[#43474d] text-[12px] font-normal leading-[18px]">
               Sudah punya akun?{" "}
             </Text>
             <TouchableOpacity
@@ -226,7 +226,7 @@ export default function RegisterAccountScreen() {
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               accessibilityRole="button"
             >
-              <Text className="text-[#006c50] text-[12px] font-semibold leading-[18px]">
+              <Text className="font-sans text-[#006c50] text-[12px] font-semibold leading-[18px]">
                 Masuk
               </Text>
             </TouchableOpacity>

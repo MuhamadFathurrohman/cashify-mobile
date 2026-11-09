@@ -159,10 +159,10 @@ export default function LoginScreen() {
 
             {/* Welcome section */}
             <View className="w-full items-center gap-1 pb-5">
-              <Text className="text-[#001d37] text-[20px] font-semibold leading-[26px] tracking-[-0.3px] text-center">
+              <Text className="font-sans text-[#001d37] text-[20px] font-semibold leading-[26px] tracking-[-0.3px] text-center">
                 Selamat Datang Kembali
               </Text>
-              <Text className="text-[#43474d] text-[12px] font-normal leading-[16px] text-center">
+              <Text className="font-sans text-[#43474d] text-[12px] font-normal leading-[16px] text-center">
                 Masuk untuk melanjutkan pengelolaan keuanganmu.
               </Text>
             </View>
@@ -226,7 +226,7 @@ export default function LoginScreen() {
                     onPress={() => router.push("/(auth)/forgot-password")}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Text className="text-[#006c50] text-[12px] font-semibold tracking-[0.24px] leading-[16px]">
+                    <Text className="font-sans text-[#006c50] text-[12px] font-semibold tracking-[0.24px] leading-[16px]">
                       Lupa password?
                     </Text>
                   </TouchableOpacity>
@@ -250,7 +250,7 @@ export default function LoginScreen() {
                     <ActivityIndicator size="small" color="#ffffff" />
                   ) : (
                     <>
-                      <Text className="text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
+                      <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
                         Masuk
                       </Text>
                       <Ionicons
@@ -267,7 +267,7 @@ export default function LoginScreen() {
               <View className="w-full items-center justify-center">
                 <View className="w-full h-px bg-[rgba(196,198,206,0.4)]" />
                 <View className="absolute bg-white px-3">
-                  <Text className="text-[#74777e] text-[10px] font-semibold tracking-[0.5px] uppercase leading-[14px]">
+                  <Text className="font-sans text-[#74777e] text-[10px] font-semibold tracking-[0.5px] uppercase leading-[14px]">
                     ATAU
                   </Text>
                 </View>
@@ -285,7 +285,7 @@ export default function LoginScreen() {
                   className="w-5 h-5"
                   resizeMode="contain"
                 />
-                <Text className="text-[#001d37] text-[14px] font-medium tracking-[-0.16px] leading-[20px]">
+                <Text className="font-sans text-[#001d37] text-[14px] font-medium tracking-[-0.16px] leading-[20px]">
                   Lanjutkan dengan Google
                 </Text>
               </TouchableOpacity>
@@ -295,14 +295,14 @@ export default function LoginScreen() {
           {/* ── Footer ── */}
           <View className="w-full pb-2 pt-8 gap-3 items-center">
             <View className="flex-row items-center justify-center">
-              <Text className="text-[#43474d] text-[12px] font-normal leading-[16px]">
+              <Text className="font-sans text-[#43474d] text-[12px] font-normal leading-[16px]">
                 Belum punya akun?{" "}
               </Text>
               <TouchableOpacity
                 onPress={() => router.push("/(auth)/register")}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Text className="text-[#006c50] text-[12px] font-semibold tracking-[0.24px] leading-[16px]">
+                <Text className="font-sans text-[#006c50] text-[12px] font-semibold tracking-[0.24px] leading-[16px]">
                   Daftar sekarang
                 </Text>
               </TouchableOpacity>
@@ -310,15 +310,15 @@ export default function LoginScreen() {
 
             <View className="flex-row items-center justify-center opacity-60 gap-4">
               <TouchableOpacity>
-                <Text className="text-[#74777e] text-[10px] font-semibold tracking-[0.4px] leading-[14px]">
+                <Text className="font-sans text-[#74777e] text-[10px] font-semibold tracking-[0.4px] leading-[14px]">
                   Kebijakan Privasi
                 </Text>
               </TouchableOpacity>
-              <Text className="text-[#74777e] text-[10px] font-semibold">
+              <Text className="font-sans text-[#74777e] text-[10px] font-semibold">
                 •
               </Text>
               <TouchableOpacity>
-                <Text className="text-[#74777e] text-[10px] font-semibold tracking-[0.4px] leading-[14px]">
+                <Text className="font-sans text-[#74777e] text-[10px] font-semibold tracking-[0.4px] leading-[14px]">
                   Syarat & Ketentuan
                 </Text>
               </TouchableOpacity>
