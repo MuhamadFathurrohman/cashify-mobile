@@ -1,18 +1,18 @@
 import { AmbientBlob } from "@/components/ui/AmbientBlob";
 import { FloatingInput } from "@/components/ui/FloatingInput";
 import { notify } from "@/components/ui/notify";
-import { PasswordRequirements } from "@/components/ui/PasswordRequirements";
-import { PasswordStrengthMeter } from "@/components/ui/PasswordStrengthMeter";
 import { StepIndicator } from "@/components/ui/StepIndicator";
 import {
-  getPasswordRequirements,
-  getPasswordStrength,
+    getPasswordRequirements,
+    getPasswordStrength,
 } from "@/features/auth/passwordPolicy";
+import { PasswordRequirements } from "@/features/auth/PasswordRequirements";
+import { PasswordStrengthMeter } from "@/features/auth/PasswordStrengthMeter";
 import { useRegisterFlow } from "@/features/auth/RegisterContext";
 import { resolveRegisterError } from "@/features/auth/registerErrors";
 import {
-  registerPasswordSchema,
-  type RegisterPasswordForm,
+    registerPasswordSchema,
+    type RegisterPasswordForm,
 } from "@/features/auth/registerSchemas";
 import { useRegister } from "@/features/auth/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,14 +21,14 @@ import { useRouter } from "expo-router";
 import { ComponentRef, useEffect, useRef } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 // ─── Komponen ─────────────────────────────────────────────────────────────────

@@ -1,45 +1,45 @@
 import { AmbientBlob } from "@/components/ui/AmbientBlob";
 import { FloatingInput } from "@/components/ui/FloatingInput";
 import { notify } from "@/components/ui/notify";
-import { PasswordRequirements } from "@/components/ui/PasswordRequirements";
-import { PasswordStrengthMeter } from "@/components/ui/PasswordStrengthMeter";
 import {
-  getPasswordRequirements,
-  getPasswordStrength,
+    getPasswordRequirements,
+    getPasswordStrength,
 } from "@/features/auth/passwordPolicy";
 import { resolveResetPasswordError } from "@/features/auth/passwordRecoveryErrors";
+import { PasswordRequirements } from "@/features/auth/PasswordRequirements";
+import { PasswordStrengthMeter } from "@/features/auth/PasswordStrengthMeter";
 import {
-  clearRecoveryLink,
-  getRecoveryLink,
-  subscribeRecoveryLink,
+    clearRecoveryLink,
+    getRecoveryLink,
+    subscribeRecoveryLink,
 } from "@/features/auth/recoveryLinkStore";
 import {
-  resetPasswordSchema,
-  type ResetPasswordForm,
+    resetPasswordSchema,
+    type ResetPasswordForm,
 } from "@/features/auth/recoverySchemas";
 import { useResetPassword } from "@/features/auth/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
-  ComponentRef,
-  useCallback,
-  useRef,
-  useState,
-  useSyncExternalStore,
+    ComponentRef,
+    useCallback,
+    useRef,
+    useState,
+    useSyncExternalStore,
 } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import {
-  ActivityIndicator,
-  BackHandler,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    BackHandler,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const logoIcon = require("@/assets/images/logo-icon-cashify.png");
