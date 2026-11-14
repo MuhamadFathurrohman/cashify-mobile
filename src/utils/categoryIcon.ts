@@ -4,9 +4,9 @@ import type { ComponentProps } from "react";
 
 type IconName = ComponentProps<typeof Ionicons>["name"];
 
-// ❓ Backend mengirim nama ikon berupa teks. Hanya `utensils` dan `car` yang terkonfirmasi
-// (dev summary, bagian 3); sisanya tebakan gaya Lucide/Feather dan harus dicocokkan
-// dengan nama sebenarnya dari GET /categories.
+// ❓ Backend mengirim nama ikon berupa teks. Terkonfirmasi: `utensils` dan `car` (dev summary,
+// bagian 3) serta `wallet` dan `shopping-bag` (respons GET /dashboard 2026-11-10). Sisanya
+// tebakan gaya Lucide/Feather dan harus dicocokkan dengan nama sebenarnya dari GET /categories.
 const ICONS: Record<string, IconName> = {
     utensils: "restaurant-outline",
     car: "car-outline",

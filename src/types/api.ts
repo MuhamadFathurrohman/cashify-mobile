@@ -166,10 +166,13 @@ export interface Account {
     is_default: boolean;
 }
 
-// Bentuk ringkas yang dipakai backend pada item transaksi (📄 SYSTEM_DOCUMENTATION, belum diuji ❓)
+// Bentuk ringkas yang dipakai backend pada item transaksi
+// (📄 OpenAPI backend, "API Response.md" 2026-11-10; belum diuji dengan respons nyata ❓)
 export type CategorySummary = Pick<Category, "id" | "name" | "icon" | "color">;
 export type AccountSummary = Pick<Account, "id" | "name">;
 
+// Spec tidak memuat `deleted_at` pada Transaction (transaksi terhapus tidak ditampilkan),
+// jadi field itu dihapus dari tipe ini. Bila tsc melaporkan pemakaian lama, hapus pemakaiannya.
 export interface Transaction {
     id: string;
     type: TransactionType;
@@ -179,33 +182,48 @@ export interface Transaction {
     date: string;
     description: string | null;
     source: TransactionSource;
-    deleted_at: string | null;
     created_at: string;
+    // Wajib dikirim kembali pada PATCH sebagai penjaga konflik (optimistic locking)
     updated_at: string;
 }
 
 export interface TransactionDetail extends Transaction {
     source_message: {
-        body: string;
+        body: string | null;
         received_at: string;
     } | null;
 }
 
-// Dashboard — GET /dashboard?month=YYYY-MM (📄 SYSTEM_DOCUMENTATION; belum diuji dengan respons nyata ❓)
-// Item recent_transactions: maksimal 5, tidak terpengaruh `month`. Field yang diasumsikan ada
-// (selain source, category, account yang tercatat di dokumen) perlu dicek dengan respons asli.
-export type DashboardTransaction = Pick<
-    Transaction,
-    | "id"
-    | "type"
-    | "amount"
-    | "date"
-    | "description"
-    | "source"
-    | "category"
-    | "account"
-    | "created_at"
->;
+// POST /transactions (📄 OpenAPI). Respons 201 berisi Transaction.
+// category_id harus bertipe sama dengan `type`; date YYYY-MM-DD, tidak boleh di masa depan
+// dan paling jauh 1 tahun ke belakang; amount integer 1..1.000.000.000; description maks. 255.
+export interface CreateTransactionRequest {
+    type: TransactionType;
+    amount: number;
+    category_id: string;
+    account_id: string;
+    date: string;
+    description?: string | null;
+}
+
+// GET /categories?type= dan GET /accounts membungkus daftar dalam `data` (tanpa paginasi)
+export interface CategoryListResponse {
+    data: Category[];
+}
+
+export interface AccountListResponse {
+    data: Account[];
+}
+
+// Dashboard — GET /dashboard?month=YYYY-MM
+// ✅ Bentuk item sudah dicocokkan dengan respons nyata (2026-11-10): id, type, amount, date,
+// description, source ("whatsapp" muncul), category {id, name, icon, color}, account {id, name},
+// created_at, updated_at; tanpa deleted_at. Item tidak terpengaruh `month` (item Oktober
+// muncul saat bulan berjalan November).
+// ❓ Jumlah maksimal item belum terbukti: respons nyata berisi 5 item, OpenAPI menyebut 10,
+// SYSTEM_DOCUMENTATION menyebut 5. Respons itu tidak membedakan keduanya bila akun tersebut
+// hanya punya 5 transaksi.
+export type DashboardTransaction = Transaction;
 
 export interface DashboardMonthSummary {
     income: number;
