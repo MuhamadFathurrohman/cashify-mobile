@@ -34,7 +34,7 @@ export function TransactionHeader({ onClose }: TransactionHeaderProps) {
             Tambah Transaksi
           </Text>
           <Text className="font-sans text-[10px] font-semibold leading-[14px] tracking-[0.4px] text-[#43474d]">
-            Catat alur kas harian • Cashify
+            Catat alur kas harian
           </Text>
         </View>
 
