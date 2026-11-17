@@ -4,7 +4,7 @@ import {
     currentDay,
     currentMonth,
     formatMonthLabel,
-} from "@/utils/JakartaDates";
+} from "@/utils/jakartaDates";
 
 // Batas dari OpenAPI backend (📄 belum diuji dengan permintaan nyata ❓)
 export const MAX_AMOUNT = 1_000_000_000;

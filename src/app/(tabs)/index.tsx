@@ -12,7 +12,7 @@ import {
   currentDay,
   currentMonth,
   formatMonthLabel,
-} from "@/utils/JakartaDates";
+} from "@/utils/jakartaDates";
 import { useRouter } from "expo-router";
 import { useMemo } from "react";
 import { RefreshControl, ScrollView, Text, View } from "react-native";

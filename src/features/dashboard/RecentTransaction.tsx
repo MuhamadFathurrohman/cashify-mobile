@@ -1,6 +1,6 @@
 import type { DashboardTransaction } from "@/types/api";
 import { categoryIconName } from "@/utils/categoryIcon";
-import { formatRelativeDate } from "@/utils/JakartaDates";
+import { formatRelativeDate } from "@/utils/jakartaDates";
 import { formatExpense, formatIncome } from "@/utils/money";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { Pressable, Text, View } from "react-native";

@@ -1,5 +1,5 @@
 import type { DashboardCashflowPoint } from "@/types/api";
-import { daysInMonth } from "@/utils/JakartaDates";
+import { daysInMonth } from "@/utils/jakartaDates";
 
 export interface CashflowBucket {
     label: string; // mis. "1–7"

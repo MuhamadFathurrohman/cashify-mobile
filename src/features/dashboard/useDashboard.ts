@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/api/client";
 import type { DashboardResponse } from "@/types/api";
-import { currentMonth } from "@/utils/JakartaDates";
+import { currentMonth } from "@/utils/jakartaDates";
 import { useQuery } from "@tanstack/react-query";
 
 // ─── Query keys ───────────────────────────────────────────────────────────────
