@@ -1,13 +1,13 @@
+import {
+  HIDDEN_AMOUNT,
+  formatBalance,
+  formatExpense,
+  formatIncome,
+} from "@/utils/money";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
-import {
-    HIDDEN_AMOUNT,
-    formatBalance,
-    formatExpense,
-    formatIncome,
-} from "./money";
 
 interface BalanceCardProps {
   balance: number;

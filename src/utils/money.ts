@@ -1,4 +1,4 @@
-// Format nominal Beranda sesuai desain: "Rp 24.850.000", "+Rp 12.500.000", "-Rp 4.720.000".
+// Format nominal sesuai desain: "Rp 24.850.000", "+Rp 12.500.000", "-Rp 4.720.000".
 // Berbeda dari formatRupiah (utils/format.ts) yang tanpa spasi dan tanpa tanda,
 // sehingga formatRupiah tidak diubah.
 function digits(amount: number): string {

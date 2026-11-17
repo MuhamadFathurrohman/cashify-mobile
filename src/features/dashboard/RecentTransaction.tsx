@@ -1,9 +1,9 @@
 import type { DashboardTransaction } from "@/types/api";
 import { categoryIconName } from "@/utils/categoryIcon";
+import { formatRelativeDate } from "@/utils/JakartaDates";
+import { formatExpense, formatIncome } from "@/utils/money";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { Pressable, Text, View } from "react-native";
-import { formatRelativeDate } from "./dashboardDates";
-import { formatExpense, formatIncome } from "./money";
 
 interface RecentTransactionsProps {
   items: DashboardTransaction[];
@@ -56,7 +56,10 @@ function TransactionRow({ item }: { item: DashboardTransaction }) {
           >
             {description || item.category.name}
           </Text>
-          <Text className="font-sans text-xs leading-4 text-[#74777e]" numberOfLines={1}>
+          <Text
+            className="font-sans text-xs leading-4 text-[#74777e]"
+            numberOfLines={1}
+          >
             {description ? `${item.category.name} • ${date}` : date}
           </Text>
         </View>

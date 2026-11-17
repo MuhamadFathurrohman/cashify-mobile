@@ -1,10 +1,10 @@
+import type { CreateTransactionRequest, TransactionType } from "@/types/api";
+import { parseRawAmount } from "@/utils/currency";
 import {
     currentDay,
     currentMonth,
     formatMonthLabel,
-} from "@/features/dashboard/dashboardDates";
-import type { CreateTransactionRequest, TransactionType } from "@/types/api";
-import { parseRawAmount } from "@/utils/currency";
+} from "@/utils/JakartaDates";
 
 // Batas dari OpenAPI backend (📄 belum diuji dengan permintaan nyata ❓)
 export const MAX_AMOUNT = 1_000_000_000;
@@ -21,7 +21,7 @@ export function validateAmount(formatted: string): string | null {
 
 // ── Tanggal ─────────────────────────────────────────────────────────────
 // Semua tanggal berupa string "YYYY-MM-DD" (kalender, tanpa jam dan tanpa zona).
-// "Hari ini" mengikuti Jakarta lewat dashboardDates, bukan zona perangkat.
+// "Hari ini" mengikuti Jakarta lewat jakartaDates, bukan zona perangkat.
 // ❓ Zona yang dipakai backend untuk aturan "tidak boleh di masa depan" belum
 // terdokumentasi; bila ternyata UTC, tanggal hari ini WIB sebelum pukul 07.00 bisa ditolak.
 
