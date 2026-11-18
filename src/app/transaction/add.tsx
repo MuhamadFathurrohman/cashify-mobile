@@ -1,6 +1,6 @@
-import { TransactionForm } from "@/features/transactions/TransactionForm";
-import { TransactionFormSkeleton } from "@/features/transactions/TransactionFormSkeleton";
-import { TransactionHeader } from "@/features/transactions/TransactionHeader";
+import { TransactionForm } from "@/features/transactions/form/TransactionForm";
+import { TransactionFormSkeleton } from "@/features/transactions/form/TransactionFormSkeleton";
+import { TransactionHeader } from "@/features/transactions/form/TransactionHeader";
 import {
   pickDefaultAccount,
   useAccounts,
