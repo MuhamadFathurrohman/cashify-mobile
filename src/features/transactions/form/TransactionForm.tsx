@@ -1,3 +1,4 @@
+import { DatePickerModal } from "@/components/ui/DatePickerModal";
 import { KeyboardScreen } from "@/components/ui/KeyboardScreen";
 import {
   SegmentedControl,
@@ -21,13 +22,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
 import {
   buildCreateRequest,
+  earliestAllowedDate,
   formatDateLong,
   MAX_DESCRIPTION_LENGTH,
   todayDate,
 } from "../transactionRules";
 import { useCategories } from "../useCategories";
 import { CategoryGrid } from "./CategoryGrid";
-import { DatePickerModal } from "./DatePickerModal";
 import { resolveTransactionError } from "./transactionErrors";
 import {
   defaultTransactionValues,
@@ -321,11 +322,10 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
               <DatePickerModal
                 visible={pickerOpen}
                 value={value}
+                minDate={earliestAllowedDate()}
+                maxDate={todayDate()}
                 accentColor={ui.accentColor}
-                onSelect={(date) => {
-                  onChange(date);
-                  setPickerOpen(false);
-                }}
+                onSelect={onChange}
                 onClose={() => setPickerOpen(false)}
               />
             </View>

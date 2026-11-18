@@ -84,30 +84,6 @@ export function validateTransactionDate(
     return null;
 }
 
-// Nilai `date` dari date picker (Date, string ISO, angka, atau objek Dayjs) -> "YYYY-MM-DD".
-// Dibaca dengan komponen tanggal LOKAL perangkat karena kalender menampilkan hari lokal;
-// itu yang dipilih pengguna, apa pun zona waktu perangkat. String "YYYY-MM-DD" dikembalikan
-// apa adanya agar tidak bergeser sehari (string tanggal saja dibaca sebagai UTC oleh Date).
-export function pickerValueToDateString(value: unknown): string | null {
-    let date: Date | null = null;
-    if (typeof value === "string" && DATE_PATTERN.test(value)) {
-        return parseDate(value) ? value : null;
-    }
-    if (value instanceof Date) {
-        date = value;
-    } else if (typeof value === "string" || typeof value === "number") {
-        date = new Date(value);
-    } else if (
-        typeof value === "object" &&
-        value !== null &&
-        typeof (value as { toDate?: unknown }).toDate === "function"
-    ) {
-        date = (value as { toDate: () => Date }).toDate();
-    }
-    if (!date || Number.isNaN(date.getTime())) return null;
-    return `${pad(date.getFullYear(), 4)}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
 // "2026-10-26" -> "26 Oktober 2026"; format tidak valid dikembalikan apa adanya
 export function formatDateLong(value: string): string {
     const parts = parseDate(value);

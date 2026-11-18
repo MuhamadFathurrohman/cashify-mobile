@@ -41,6 +41,13 @@ export function daysInMonth(month: string): number {
     return new Date(Date.UTC(year, m, 0)).getUTCDate();
 }
 
+// "2026-11-01" -> "01 Nov 2026"; format tidak valid dikembalikan apa adanya
+export function formatDateShort(date: string): string {
+    const [year, month, day] = date.slice(0, 10).split("-").map(Number);
+    if (!year || !month || month > 12 || !day) return date;
+    return `${String(day).padStart(2, "0")} ${MONTHS_SHORT[month - 1]} ${year}`;
+}
+
 // "Hari ini", "Kemarin", atau "26 Okt" (+ tahun bila bukan tahun ini).
 // Backend hanya memberi tanggal tanpa jam, jadi tidak ada keterangan waktu.
 export function formatRelativeDate(date: string, now: Date = new Date()): string {
