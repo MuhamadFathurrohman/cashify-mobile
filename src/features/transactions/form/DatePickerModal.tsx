@@ -3,10 +3,10 @@ import { Modal, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DateTimePicker, { useDefaultStyles } from "react-native-ui-datepicker";
 import {
-    earliestAllowedDate,
-    pickerValueToDateString,
-    todayDate,
-} from "./transactionRules";
+  earliestAllowedDate,
+  pickerValueToDateString,
+  todayDate,
+} from "../transactionRules";
 
 interface DatePickerModalProps {
   visible: boolean;

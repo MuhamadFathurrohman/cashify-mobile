@@ -2,7 +2,7 @@ import { dashboardKeys } from "@/features/dashboard/useDashboard";
 import { apiClient } from "@/lib/api/client";
 import type { CreateTransactionRequest, Transaction } from "@/types/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { transactionKeys } from "./transactionKeys";
+import { transactionKeys } from "../transactionKeys";
 
 async function createTransaction(body: CreateTransactionRequest): Promise<Transaction> {
     return apiClient.post<Transaction>("/transactions", body);

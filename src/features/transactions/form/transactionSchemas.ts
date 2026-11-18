@@ -4,7 +4,7 @@ import {
     todayDate,
     validateAmount,
     validateTransactionDate,
-} from "./transactionRules";
+} from "../transactionRules";
 
 // Jenis transaksi (pengeluaran/pemasukan) tidak masuk skema: ia berasal dari toggle
 // dan dikirim terpisah lewat buildCreateRequest. Semua nilai berupa string agar tipe
