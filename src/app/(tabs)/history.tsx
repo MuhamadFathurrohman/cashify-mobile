@@ -26,6 +26,7 @@ import type {
   TransactionType,
 } from "@/types/api";
 import { type InfiniteData, useQueryClient } from "@tanstack/react-query";
+import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, RefreshControl, View } from "react-native";
 
@@ -52,6 +53,12 @@ export default function HistoryScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sheetVisible, setSheetVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Tab bar tetap bisa ditekan saat sheet terbuka, jadi sheet ditutup ketika
+  // pengguna berpindah tab agar tidak terbuka lagi saat layar ini kembali
+  useFocusEffect(
+    useCallback(() => () => setSheetVisible(false), []),
+  );
 
   // Debounce manual: query dikirim ke hook hanya setelah pengguna berhenti mengetik
   useEffect(() => {
@@ -228,6 +235,7 @@ export default function HistoryScreen() {
         activeFilters={filters}
         activeType={type}
         onApply={handleApplyFilters}
+        onReset={handleResetFilters}
         onClose={() => setSheetVisible(false)}
       />
     </View>
