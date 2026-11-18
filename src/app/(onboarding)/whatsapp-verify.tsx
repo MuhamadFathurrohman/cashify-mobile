@@ -31,8 +31,7 @@ import Animated, {
 // ─── Konfigurasi ──────────────────────────────────────────────────────────────
 const OTP_LENGTH = 6;
 const RESEND_COOLDOWN = 60; // detik
-// ⚠️ Ganti dengan nomor WA bot Cashify yang sebenarnya (tanpa + dan spasi)
-const BOT_WA_NUMBER = "628XXXXXXXXXX";
+const BOT_WA_NUMBER = "62895379035267";
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 function formatCountdown(seconds: number): string {
@@ -83,7 +82,8 @@ function OtpInput({ value, onChange, hasError, editable }: OtpInputProps) {
                 justifyContent: "center",
               }}
             >
-              <Text className="font-sans"
+              <Text
+                className="font-sans"
                 style={{
                   fontSize: 22,
                   fontWeight: "700",
@@ -99,7 +99,8 @@ function OtpInput({ value, onChange, hasError, editable }: OtpInputProps) {
       </View>
 
       {/* Input tersembunyi — menangkap keyboard */}
-      <TextInput className="font-sans"
+      <TextInput
+        className="font-sans"
         ref={inputRef}
         value={value}
         onChangeText={(text) => {
