@@ -150,6 +150,49 @@ export type ResendWhatsAppOtpRequest = undefined;
 export type ResendWhatsAppOtpResponse = LinkWhatsAppResponse;
 
 
+export interface Account {
+    id: string;
+    name: string;
+    type: AccountType;
+    is_default: boolean;
+}
+
+
+export interface AccountListResponse {
+    data: Account[];
+}
+
+// Dashboard — GET /dashboard?month=YYYY-MM
+// ✅ Bentuk item sudah dicocokkan dengan respons nyata (2026-11-10): id, type, amount, date,
+// description, source ("whatsapp" muncul), category {id, name, icon, color}, account {id, name},
+// created_at, updated_at; tanpa deleted_at. Item tidak terpengaruh `month` (item Oktober
+// muncul saat bulan berjalan November).
+// ❓ Jumlah maksimal item belum terbukti: respons nyata berisi 5 item, OpenAPI menyebut 10,
+// SYSTEM_DOCUMENTATION menyebut 5. Respons itu tidak membedakan keduanya bila akun tersebut
+// hanya punya 5 transaksi.
+export type DashboardTransaction = Transaction;
+
+export interface DashboardMonthSummary {
+    income: number;
+    expense: number;
+    net: number;
+}
+
+// Hanya hari yang punya transaksi yang muncul di array; date berformat YYYY-MM-DD
+export interface DashboardCashflowPoint {
+    date: string;
+    income: number;
+    expense: number;
+}
+
+export interface DashboardResponse {
+    // initial_balance + seluruh pemasukan - seluruh pengeluaran (seluruh waktu); bisa negatif
+    balance: number;
+    month: DashboardMonthSummary;
+    cashflow: DashboardCashflowPoint[];
+    recent_transactions: DashboardTransaction[];
+}
+
 export interface Category {
     id: string;
     name: string;
@@ -157,13 +200,6 @@ export interface Category {
     icon: string;
     color: string;
     is_system: boolean;
-}
-
-export interface Account {
-    id: string;
-    name: string;
-    type: AccountType;
-    is_default: boolean;
 }
 
 // Bentuk ringkas yang dipakai backend pada item transaksi
@@ -211,37 +247,16 @@ export interface CategoryListResponse {
     data: Category[];
 }
 
-export interface AccountListResponse {
-    data: Account[];
+// GET /transactions — parameter filter (cursor dan limit dikelola hook, bukan pemanggil)
+export interface TransactionListParams {
+    type?: TransactionType;
+    from?: string;          // YYYY-MM-DD, inklusif
+    to?: string;            // YYYY-MM-DD, inklusif
+    category_id?: string;
+    account_id?: string;
+    source?: TransactionSource;
+    q?: string;
 }
 
-// Dashboard — GET /dashboard?month=YYYY-MM
-// ✅ Bentuk item sudah dicocokkan dengan respons nyata (2026-11-10): id, type, amount, date,
-// description, source ("whatsapp" muncul), category {id, name, icon, color}, account {id, name},
-// created_at, updated_at; tanpa deleted_at. Item tidak terpengaruh `month` (item Oktober
-// muncul saat bulan berjalan November).
-// ❓ Jumlah maksimal item belum terbukti: respons nyata berisi 5 item, OpenAPI menyebut 10,
-// SYSTEM_DOCUMENTATION menyebut 5. Respons itu tidak membedakan keduanya bila akun tersebut
-// hanya punya 5 transaksi.
-export type DashboardTransaction = Transaction;
-
-export interface DashboardMonthSummary {
-    income: number;
-    expense: number;
-    net: number;
-}
-
-// Hanya hari yang punya transaksi yang muncul di array; date berformat YYYY-MM-DD
-export interface DashboardCashflowPoint {
-    date: string;
-    income: number;
-    expense: number;
-}
-
-export interface DashboardResponse {
-    // initial_balance + seluruh pemasukan - seluruh pengeluaran (seluruh waktu); bisa negatif
-    balance: number;
-    month: DashboardMonthSummary;
-    cashflow: DashboardCashflowPoint[];
-    recent_transactions: DashboardTransaction[];
-}
+// GET /transactions — menggunakan PaginatedResponse<Transaction> yang sudah ada
+export type TransactionListResponse = PaginatedResponse<Transaction>;
