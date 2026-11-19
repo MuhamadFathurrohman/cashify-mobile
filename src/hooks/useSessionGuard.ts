@@ -1,4 +1,4 @@
-import { useAuthStore, type AuthStatus } from "@/features/auth/authStore";
+import { useAuthStore } from "@/features/auth/authStore";
 import {
     resolveOnboardingStep,
     useOnboardingStore,
@@ -6,19 +6,8 @@ import {
 import { apiClient } from "@/lib/api/client";
 import { getTokens } from "@/lib/storage/keychain";
 import type { UserProfile } from "@/types/api";
-import { useRouter, useSegments } from "expo-router";
+import { useRouter, useSegments, type Href } from "expo-router";
 import { useEffect } from "react";
-
-type ResolvedStatus = Exclude<AuthStatus, "loading">;
-
-// Grup rute yang boleh diakses per status. "transaction" berada di luar grup
-// tapi hanya untuk pengguna yang sudah siap
-const ALLOWED_GROUPS: Record<ResolvedStatus, string[]> = {
-    signedOut: ["(auth)"],
-    needsOnboarding: ["(onboarding)"],
-    ready: ["(tabs)", "transaction"],
-    unavailable: ["(auth)"],
-};
 
 const ONBOARDING_ROUTE = {
     welcome: "/(onboarding)/welcome",
@@ -26,26 +15,19 @@ const ONBOARDING_ROUTE = {
     whatsapp: "/(onboarding)/whatsapp",
 } as const;
 
-const DEFAULT_ROUTE = {
-    signedOut: "/(auth)/login",
-    ready: "/(tabs)",
-    unavailable: "/(auth)/unavailable",
-} as const;
+// Layar onboarding yang bukan langkah resume: jangan dialihkan oleh guard.
+// whatsapp-verify adalah lanjutan di dalam alur WhatsApp.
+const NON_RESUME_ONBOARDING_SCREEN = "whatsapp-verify";
 
-// needsOnboarding memakai progres lokal agar app dibuka kembali di langkah terakhir
-function getDefaultRoute(status: ResolvedStatus) {
-    if (status === "needsOnboarding") {
-        const userId = useAuthStore.getState().user?.id;
-        const { progress } = useOnboardingStore.getState();
-        return ONBOARDING_ROUTE[resolveOnboardingStep(progress, userId)];
-    }
-    return DEFAULT_ROUTE[status];
-}
-
+// Guard sesi bertugas menyelesaikan status auth dan memilih langkah onboarding.
+// Pembatasan akses rute kini dilakukan deklaratif lewat Stack.Protected di
+// src/app/_layout.tsx, bukan lewat router.replace berbasis effect.
 export function useSessionGuard() {
     const router = useRouter();
     const segments = useSegments();
     const status = useAuthStore((s) => s.status);
+    const userId = useAuthStore((s) => s.user?.id);
+    const progress = useOnboardingStore((s) => s.progress);
 
     // Jalankan bootstrap setiap kali status berubah ke "loading".
     // Ini mencakup dua kasus:
@@ -82,7 +64,7 @@ export function useSessionGuard() {
                 // dengan "unavailable".
                 if (useAuthStore.getState().status === "signedOut") return;
                 // Jaringan tidak terjangkau atau server error (5xx):
-                // token dipertahankan, arahkan ke layar unavailable
+                // token dipertahankan, status unavailable menampilkan layar khusus
                 setUnavailable();
             }
         }
@@ -93,20 +75,36 @@ export function useSessionGuard() {
         };
     }, [status]);
 
-    // Arahkan ke grup yang sesuai setiap status atau rute berubah
-    // (login, logout, sesi habis, onboarding selesai, unavailable)
+    // Stack.Protected hanya memilih grup rute, bukan langkah di dalam grup.
+    // Karena itu langkah onboarding tetap dipilih di sini dari progres lokal.
     useEffect(() => {
-        if (status === "loading") return;
+        if (status !== "needsOnboarding") return;
+        if (segments[0] !== "(onboarding)") return;
 
-        const parts: readonly string[] = segments;
-        const group = parts[0];
-        // Tautan reset bisa dibuka pada status apa pun, termasuk saat sudah login
-        if (group === "(auth)" && parts[1] === "reset-password") return;
+        const currentScreen = segments[1];
+        if (currentScreen === NON_RESUME_ONBOARDING_SCREEN) return;
 
-        if (!group || !ALLOWED_GROUPS[status].includes(group)) {
-            router.replace(getDefaultRoute(status));
+        const userId = useAuthStore.getState().user?.id;
+        const { progress } = useOnboardingStore.getState();
+        const step = resolveOnboardingStep(progress, userId);
+
+        if (currentScreen !== step) {
+            router.replace(ONBOARDING_ROUTE[step]);
         }
     }, [status, segments, router]);
 
-    return { isReady: status !== "loading" };
+    // Target redirect ketika sebuah guard gagal. Harus berupa rute konkret:
+    // grup (auth) dan (onboarding) tidak punya index sendiri, sehingga fallback
+    // bawaan navigator berupa path grup ("/(auth)") tidak cocok dengan rute mana
+    // pun dan berakhir di layar "Unmatched Route".
+    const redirectTo: Href =
+        status === "signedOut"
+            ? "/login"
+            : status === "needsOnboarding"
+              ? ONBOARDING_ROUTE[resolveOnboardingStep(progress, userId)]
+              : status === "unavailable"
+                ? "/unavailable"
+                : "/";
+
+    return { isReady: status !== "loading", redirectTo };
 }

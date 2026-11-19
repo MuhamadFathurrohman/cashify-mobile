@@ -1,5 +1,6 @@
 import { SplashScreen as CashifySplashScreen } from "@/components/ui/SplashScreen";
 import { startLinkCapture } from "@/features/auth/recoveryLinkStore";
+import { useAuthStore } from "@/features/auth/authStore";
 import { useSessionGuard } from "@/hooks/useSessionGuard";
 import { APP_FONTS } from "@/lib/fonts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -29,7 +30,8 @@ const queryClient = new QueryClient({
 });
 
 function RootLayoutNav() {
-  const { isReady } = useSessionGuard();
+  const { isReady, redirectTo } = useSessionGuard();
+  const status = useAuthStore((state) => state.status);
   const [fontsLoaded, fontError] = useFonts(APP_FONTS);
 
   // Gagal memuat font tidak boleh memblokir aplikasi: lanjut dengan font sistem
@@ -45,12 +47,40 @@ function RootLayoutNav() {
     return <CashifySplashScreen />;
   }
 
+  // Rute yang tidak lolos guard TIDAK terdaftar di navigator, sehingga layar pertama
+  // yang tampil selalu layar yang sah untuk status saat ini. Ini menggantikan
+  // router.replace berbasis effect yang sempat menampilkan login sekejap sebelum
+  // Beranda (kilatan halaman login).
+  //
+  // redirectTo WAJIB diisi rute konkret: tanpa itu expo-router memakai path grup
+  // sebagai fallback, dan grup (auth)/(onboarding) tidak punya index sehingga
+  // hasilnya layar "Unmatched Route" saat logout atau cold start tanpa sesi.
+  // Nilainya dihitung dari status terkini di useSessionGuard.
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(onboarding)" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="transaction" />
+      <Stack.Protected guard={status === "ready"} redirectTo={redirectTo}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="transaction" />
+      </Stack.Protected>
+
+      <Stack.Protected guard={status === "signedOut"} redirectTo={redirectTo}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+
+      <Stack.Protected
+        guard={status === "needsOnboarding"}
+        redirectTo={redirectTo}
+      >
+        <Stack.Screen name="(onboarding)" />
+      </Stack.Protected>
+
+      <Stack.Protected guard={status === "unavailable"} redirectTo={redirectTo}>
+        <Stack.Screen name="unavailable" />
+      </Stack.Protected>
+
+      {/* Tautan pemulihan password dari email bisa dibuka pada status apa pun yang
+          sudah resolve, termasuk saat sudah login. Tidak boleh diproteksi. */}
+      <Stack.Screen name="reset-password" />
     </Stack>
   );
 }

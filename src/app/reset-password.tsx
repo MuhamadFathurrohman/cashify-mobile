@@ -18,12 +18,14 @@ import {
     type ResetPasswordForm,
 } from "@/features/auth/recoverySchemas";
 import { useResetPassword } from "@/features/auth/useAuth";
+import { useAuthStore } from "@/features/auth/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
     ComponentRef,
     useCallback,
+    useEffect,
     useRef,
     useState,
     useSyncExternalStore,
@@ -63,6 +65,9 @@ export default function ResetPasswordScreen() {
   // Setelah sukses, tampilan form dipertahankan sampai navigasi selesai;
   // tautan sudah dibuang, tanpa ini panel "Tautan Tidak Valid" sempat muncul
   const [done, setDone] = useState(false);
+  // Sukses reset: navigasi menunggu status auth berubah menjadi signedOut
+  const [succeeded, setSucceeded] = useState(false);
+  const status = useAuthStore((state) => state.status);
   const busy = isPending || done;
 
   const {
@@ -107,6 +112,16 @@ export default function ResetPasswordScreen() {
     router.replace("/(auth)/forgot-password");
   };
 
+  // Navigasi ke login menunggu status benar-benar signedOut. Tanpa ini, replace
+  // bisa terjadi saat status masih "ready" ketika grup (auth) belum terdaftar
+  // di navigator, sehingga pengguna terlempar ke Beranda sekejap.
+  useEffect(() => {
+    if (!succeeded || status !== "signedOut") return;
+    clearRecoveryLink();
+    if (router.canGoBack()) router.dismissTo("/(auth)/login");
+    else router.replace("/(auth)/login");
+  }, [succeeded, status, router]);
+
   const onSubmit = (data: ResetPasswordForm) => {
     if (done || link?.kind !== "token") return;
 
@@ -115,11 +130,11 @@ export default function ResetPasswordScreen() {
       {
         onSuccess: () => {
           setDone(true);
+          setSucceeded(true);
           notify.success(
             "Kata Sandi Diperbarui",
             "Silakan masuk dengan kata sandi baru.",
           );
-          goToLogin();
         },
         onError: (error) => {
           const { field, message, invalidLink } =
