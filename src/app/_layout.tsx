@@ -14,6 +14,12 @@ import "../../global.css";
 
 // Tahan native splash screen agar tidak hilang otomatis
 SplashScreen.preventAutoHideAsync();
+
+// Native splash memakai komposisi yang sama dengan CashifySplashScreen
+// (assets/images/splash-cashify.png), jadi peralihan ke layar pertama tidak
+// terasa sebagai lompatan. Fade hanya berefek penuh di iOS.
+SplashScreen.setOptions({ duration: 300, fade: true });
+
 startLinkCapture();
 
 const queryClient = new QueryClient({
