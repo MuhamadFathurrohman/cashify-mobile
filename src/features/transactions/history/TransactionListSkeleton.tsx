@@ -16,9 +16,7 @@ function SkeletonGroup({ itemCount }: { itemCount: number }) {
         {Array.from({ length: itemCount }).map((_, index) => (
           <View
             key={index}
-            className={`flex-row items-center justify-between py-[10px] ${
-              index > 0 ? "border-t border-[rgba(222,233,252,0.6)]" : ""
-            }`}
+            className="flex-row items-center justify-between py-[10px]"
           >
             {/* Bubble ikon */}
             <SkeletonBlock className="h-11 w-11 rounded-2xl" />

@@ -1,4 +1,5 @@
 import { ErrorState } from "@/components/ui/ErrorState";
+import { RefreshErrorBanner } from "@/components/ui/RefreshErrorBanner";
 import { useAuthStore } from "@/features/auth/authStore";
 import { BalanceCard } from "@/features/dashboard/BalancedCard";
 import { CashflowCard } from "@/features/dashboard/CashflowCard";
@@ -39,6 +40,9 @@ export default function HomeScreen() {
     error instanceof ApiRequestError && error.code === "NETWORK_ERROR"
       ? error.message
       : FALLBACK_ERROR;
+
+  // Refresh gagal sementara data lama masih ada: beri tahu tanpa mengosongkan layar
+  const showRefreshError = isError && !!data && !isRefetching;
 
   let body;
   if (data) {
@@ -102,6 +106,9 @@ export default function HomeScreen() {
             Kelola Keuangan, Capai Tujuan.
           </Text>
         </View>
+        {showRefreshError ? (
+          <RefreshErrorBanner onRetry={() => void refetch()} />
+        ) : null}
         {body}
       </ScrollView>
     </View>

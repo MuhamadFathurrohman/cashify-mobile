@@ -14,8 +14,11 @@ export function TransactionListFooter({
 }: TransactionListFooterProps) {
   if (isFetchingNextPage) {
     return (
-      <View className="items-center py-4">
+      <View className="flex-row items-center justify-center py-4">
         <ActivityIndicator color="#006c50" />
+        <Text className="font-sans ml-2 text-xs text-[#43474d]">
+          Memuat transaksi lainnya…
+        </Text>
       </View>
     );
   }

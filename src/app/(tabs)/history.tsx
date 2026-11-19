@@ -1,4 +1,5 @@
 import { ErrorState } from "@/components/ui/ErrorState";
+import { RefreshErrorBanner } from "@/components/ui/RefreshErrorBanner";
 import { HistoryHeader } from "@/features/transactions/history/HistoryHeader";
 import {
   TransactionDateGroup,
@@ -11,7 +12,6 @@ import {
 } from "@/features/transactions/history/TransactionFilterSheet";
 import { TransactionListFooter } from "@/features/transactions/history/TransactionListFooter";
 import { TransactionListSkeleton } from "@/features/transactions/history/TransactionListSkeleton";
-import { TransactionRefreshBanner } from "@/features/transactions/history/TransactionRefreshBanner";
 import { TransactionSummaryCard } from "@/features/transactions/history/TransactionSummaryCard";
 import { useTransactions } from "@/features/transactions/history/useTransactions";
 import {
@@ -28,7 +28,7 @@ import type {
 import { type InfiniteData, useQueryClient } from "@tanstack/react-query";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FlatList, RefreshControl, View } from "react-native";
+import { FlatList, Keyboard, RefreshControl, View } from "react-native";
 
 const SEARCH_DEBOUNCE_MS = 400;
 const FALLBACK_ERROR =
@@ -135,6 +135,12 @@ export default function HistoryScreen() {
     }
   }, [queryClient, listParams, summary, refetch]);
 
+  // Keyboard dari kolom pencarian bisa menutupi sheet, jadi ditutup lebih dulu
+  const handleOpenFilter = useCallback(() => {
+    Keyboard.dismiss();
+    setSheetVisible(true);
+  }, []);
+
   const handleApplyFilters = useCallback(
     (next: ActiveFilters, nextType: TransactionType | undefined) => {
       setFilters(next);
@@ -152,7 +158,7 @@ export default function HistoryScreen() {
   const listHeader = (
     <View className="gap-3 pb-4">
       {showRefreshError ? (
-        <TransactionRefreshBanner onRetry={() => void handleRefresh()} />
+        <RefreshErrorBanner onRetry={() => void handleRefresh()} />
       ) : null}
       <TransactionSummaryCard
         summary={summary.summary}
@@ -191,7 +197,7 @@ export default function HistoryScreen() {
         searchInput={searchInput}
         onSearchChange={setSearchInput}
         hasActiveFilters={hasActiveFilters}
-        onOpenFilter={() => setSheetVisible(true)}
+        onOpenFilter={handleOpenFilter}
         type={type}
         onTypeChange={setType}
       />

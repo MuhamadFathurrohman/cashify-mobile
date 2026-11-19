@@ -57,15 +57,8 @@ export function TransactionDateGroup({ group }: { group: DateGroup }) {
           elevation: 1,
         }}
       >
-        {group.items.map((item, index) => (
-          <View
-            key={item.id}
-            className={
-              index > 0 ? "border-t border-[rgba(222,233,252,0.6)]" : ""
-            }
-          >
-            <TransactionListItem item={item} />
-          </View>
+        {group.items.map((item) => (
+          <TransactionListItem key={item.id} item={item} />
         ))}
       </View>
     </View>
