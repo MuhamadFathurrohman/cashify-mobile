@@ -1,4 +1,5 @@
 import { AmbientBlob } from "@/components/ui/AmbientBlob";
+import { KeyboardScreen } from "@/components/ui/KeyboardScreen";
 import { notify } from "@/components/ui/notify";
 import { useCompleteOnboarding } from "@/features/profile/useProfile";
 import {
@@ -10,9 +11,18 @@ import {
   describeVerifyError,
   getRetryAfterSeconds,
 } from "@/features/whatsapp/whatsappErrors";
+import { useKeyboardAwareScreen } from "@/hooks/useKeyboardAwareScreen";
 import Ionicons from "@react-native-vector-icons/ionicons";
+import * as Clipboard from "expo-clipboard";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ComponentRef, useCallback, useEffect, useRef, useState } from "react";
+import {
+  ComponentRef,
+  RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   BackHandler,
@@ -27,17 +37,26 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // ─── Konfigurasi ──────────────────────────────────────────────────────────────
 const OTP_LENGTH = 6;
 const RESEND_COOLDOWN = 60; // detik
 const BOT_WA_NUMBER = "62895379035267";
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
-function formatCountdown(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return m > 0 ? `${m}:${String(s).padStart(2, "0")}` : `${s} detik`;
+function formatBotNumber(digits: string): string {
+  const national = digits.replace(/^62/, "");
+  return `+62 ${national.slice(0, 3)}-${national.slice(3, 7)}-${national.slice(7)}`;
+}
+
+const BOT_DISPLAY = formatBotNumber(BOT_WA_NUMBER);
+const BOT_COPY = `+62${BOT_WA_NUMBER.replace(/^62/, "")}`;
+
+// Sama seperti formatCountdown di forgotPasswordCooldown: selalu mm:ss
+function formatCountdown(totalSeconds: number): string {
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+  return `${minutes}:${seconds}`;
 }
 
 // ─── Komponen OTP Box ─────────────────────────────────────────────────────────
@@ -46,10 +65,16 @@ interface OtpInputProps {
   onChange: (val: string) => void;
   hasError: boolean;
   editable: boolean;
+  inputRef: RefObject<ComponentRef<typeof TextInput> | null>;
 }
 
-function OtpInput({ value, onChange, hasError, editable }: OtpInputProps) {
-  const inputRef = useRef<ComponentRef<typeof TextInput>>(null);
+function OtpInput({
+  value,
+  onChange,
+  hasError,
+  editable,
+  inputRef,
+}: OtpInputProps) {
   const digits = value.split("");
 
   return (
@@ -58,7 +83,8 @@ function OtpInput({ value, onChange, hasError, editable }: OtpInputProps) {
       onPress={() => inputRef.current?.focus()}
       accessibilityLabel="Kotak input kode OTP"
     >
-      <View className="flex-row justify-center gap-3">
+      {/* Lebar fleksibel dengan batas 46 dp: enam kotak tetap muat di layar 360 dp */}
+      <View className="w-full flex-row justify-center gap-2">
         {Array.from({ length: OTP_LENGTH }).map((_, i) => {
           const filled = digits[i] !== undefined;
           const isActive = i === digits.length && editable;
@@ -66,7 +92,8 @@ function OtpInput({ value, onChange, hasError, editable }: OtpInputProps) {
             <View
               key={i}
               style={{
-                width: 46,
+                flex: 1,
+                maxWidth: 46,
                 height: 54,
                 borderRadius: 14,
                 borderWidth: 1.5,
@@ -143,6 +170,13 @@ export default function WhatsAppVerifyScreen() {
   const { mutateAsync: completeOnboarding, isPending: isFinishing } =
     useCompleteOnboarding();
 
+  const insets = useSafeAreaInsets();
+  const otpInputRef = useRef<ComponentRef<typeof TextInput>>(null);
+  const { scrollRef, keyboardVisible, onLayout } = useKeyboardAwareScreen({
+    scrollTo: otpInputRef,
+    delay: 200,
+  });
+
   const [screenState, setScreenState] = useState<ScreenState>("input");
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState<string | null>(null);
@@ -151,6 +185,8 @@ export default function WhatsAppVerifyScreen() {
   const [cooldown, setCooldown] = useState(
     params.fresh === "1" ? RESEND_COOLDOWN : 0,
   );
+
+  const isBusy = isVerifying || isResending;
 
   // Animasi sukses
   const iconScale = useSharedValue(0.85);
@@ -190,27 +226,57 @@ export default function WhatsAppVerifyScreen() {
     iconOpacity.value = withTiming(1, { duration: 350 });
   }, [iconScale, iconOpacity]);
 
+  const submitOtp = useCallback(
+    (code: string) => {
+      verifyOtp(
+        { code },
+        {
+          onSuccess: () => {
+            setScreenState("success");
+            triggerSuccessAnimation();
+          },
+          onError: (err) => {
+            // Reset OTP agar user tidak edit parsial — lebih mudah ketik ulang
+            setOtp("");
+            setOtpError(describeVerifyError(err));
+          },
+        },
+      );
+    },
+    [verifyOtp, triggerSuccessAnimation],
+  );
+
+  const autoSubmittedRef = useRef(false);
+
+  // Kirim otomatis setelah 6 digit terisi, tetapi tombol tetap tersedia
+  useEffect(() => {
+    if (otp.length < OTP_LENGTH) {
+      autoSubmittedRef.current = false;
+      return;
+    }
+    if (
+      otp.length !== OTP_LENGTH ||
+      isBusy ||
+      screenState !== "input" ||
+      autoSubmittedRef.current
+    ) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      autoSubmittedRef.current = true;
+      submitOtp(otp);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [otp, isBusy, screenState, submitOtp]);
+
   const handleVerify = () => {
     if (otp.length < OTP_LENGTH) {
       setOtpError("Masukkan semua 6 digit kode");
       return;
     }
     setOtpError(null);
-
-    verifyOtp(
-      { code: otp },
-      {
-        onSuccess: () => {
-          setScreenState("success");
-          triggerSuccessAnimation();
-        },
-        onError: (err) => {
-          // Reset OTP agar user tidak edit parsial — lebih mudah ketik ulang
-          setOtp("");
-          setOtpError(describeVerifyError(err));
-        },
-      },
-    );
+    autoSubmittedRef.current = true;
+    submitOtp(otp);
   };
 
   const handleResend = () => {
@@ -238,6 +304,15 @@ export default function WhatsAppVerifyScreen() {
     Linking.openURL(`https://wa.me/${BOT_WA_NUMBER}`);
   };
 
+  const handleCopyBot = async () => {
+    try {
+      await Clipboard.setStringAsync(BOT_COPY);
+      notify.success("Nomor Disalin", "Nomor bot Cashify siap ditempel.");
+    } catch {
+      notify.error("Gagal Menyalin", "Coba lagi.");
+    }
+  };
+
   // Tandai onboarding selesai di server; setUser membuat guard memindahkan ke tabs,
   // jadi tidak ada router.replace di sini
   const handleFinish = async () => {
@@ -248,7 +323,7 @@ export default function WhatsAppVerifyScreen() {
     }
   };
 
-  const isBusy = isVerifying || isResending;
+  const footerPadding = keyboardVisible ? 12 : insets.bottom + 16;
 
   // ── State: sukses ────────────────────────────────────────────────────────────
   if (screenState === "success") {
@@ -263,25 +338,23 @@ export default function WhatsAppVerifyScreen() {
           className="left-[-80px] bottom-[-96px] w-[288px] h-[288px]"
         />
 
-        {/* Header — back menuju tabs, bukan kembali ke OTP */}
-        <View className="flex-row items-center justify-between px-5 pt-4 h-[56px]">
-          <TouchableOpacity
-            onPress={handleFinish}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            disabled={isFinishing}
-            accessibilityRole="button"
-            accessibilityLabel="Ke Dashboard"
-          >
-            <Ionicons name="arrow-back" size={22} color="#001d37" />
-          </TouchableOpacity>
+        {/* Header — tanpa tombol back. Setelah verifikasi berhasil, satu-satunya
+            jalan keluar adalah tombol lanjut di bawah kartu. */}
+        <View
+          className="flex-row items-center justify-between px-5"
+          style={{ paddingTop: insets.top + 16, paddingBottom: 8 }}
+        >
+          <View className="w-[22px]" />
           <Text className="font-sans text-[#001d37] text-[16px] font-semibold tracking-[-0.08px] leading-[24px]">
             Verifikasi WhatsApp
           </Text>
-          {/* Spacer agar judul tetap tengah */}
-          <View style={{ width: 22 }} />
+          <View className="w-[22px]" />
         </View>
 
-        <View className="flex-1 px-5 pb-6 justify-center">
+        <View
+          className="flex-1 px-5 justify-center"
+          style={{ paddingBottom: insets.bottom + 16 }}
+        >
           <View
             className="w-full rounded-[28px] bg-white px-7 pt-7 pb-7 items-center"
             style={{
@@ -319,20 +392,26 @@ export default function WhatsAppVerifyScreen() {
               className="mb-5"
             />
 
-            {/* Info nomor bot */}
+            {/* Info nomor bot — ditekan untuk menyalin */}
             <View className="w-full items-center gap-1 pb-5">
               <Text className="font-sans text-[#74777e] text-[11px] font-normal leading-[16px]">
                 Nomor bot Cashify
               </Text>
-              <View
+              <TouchableOpacity
+                onPress={handleCopyBot}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                activeOpacity={0.7}
                 className="flex-row items-center gap-2 px-4 py-2 rounded-full"
                 style={{ backgroundColor: "rgba(127,249,204,0.15)" }}
+                accessibilityRole="button"
+                accessibilityLabel={`Salin nomor bot ${BOT_DISPLAY}`}
               >
                 <Ionicons name="logo-whatsapp" size={14} color="#006c50" />
                 <Text className="font-sans text-[#006c50] text-[13px] font-semibold leading-[19px]">
-                  {BOT_WA_NUMBER.replace(/^62/, "+62 ")}
+                  {BOT_DISPLAY}
                 </Text>
-              </View>
+                <Ionicons name="copy-outline" size={13} color="#006c50" />
+              </TouchableOpacity>
             </View>
 
             {/* Tombol buka WhatsApp */}
@@ -367,7 +446,7 @@ export default function WhatsAppVerifyScreen() {
                 <ActivityIndicator size="small" color="#74777e" />
               ) : (
                 <Text className="font-sans text-[#74777e] text-[12px] font-normal leading-[18px] text-center">
-                  Lanjut ke Cashify
+                  Lanjut ke Beranda
                 </Text>
               )}
             </TouchableOpacity>
@@ -389,8 +468,11 @@ export default function WhatsAppVerifyScreen() {
         className="left-[-80px] bottom-[-80px] w-[320px] h-[320px]"
       />
 
-      {/* Header — hanya back + judul, tanpa Lewati */}
-      <View className="flex-row items-center justify-between px-5 pt-4 h-[56px]">
+      {/* Header — hanya back + judul, tanpa Lewati. Tetap diam saat keyboard terbuka. */}
+      <View
+        className="flex-row items-center justify-between px-5"
+        style={{ paddingTop: insets.top + 16, paddingBottom: 8 }}
+      >
         <TouchableOpacity
           onPress={() => router.back()}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -407,126 +489,134 @@ export default function WhatsAppVerifyScreen() {
         <View style={{ width: 22 }} />
       </View>
 
-      <View className="flex-1 px-5 pb-6">
-        {/* ── Kartu konten ── */}
-        <View
-          className="w-full rounded-[24px] bg-white px-[25px] py-[22px] mt-4 gap-5"
-          style={{
-            borderWidth: 1,
-            borderColor: "rgba(222,233,252,0.4)",
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.04,
-            shadowRadius: 20,
-            elevation: 3,
-          }}
-        >
-          {/* Heading */}
-          <View className="items-center gap-[6px]">
-            <Text className="font-sans text-[#001d37] text-[20px] font-bold tracking-[-0.5px] leading-[25px] text-center">
-              Masukkan Kode OTP
-            </Text>
-            <Text className="font-sans text-[#74777e] text-[13px] font-normal leading-[20px] text-center">
-              Kode 6 digit dikirim ke WhatsApp{"\n"}
-              <Text className="font-sans text-[#001d37] font-semibold">
-                {phoneDisplay}
+      <KeyboardScreen
+        className="bg-none"
+        scrollRef={scrollRef}
+        contentContainerClassName="px-5 pb-6"
+        keyboardDismissMode="on-drag"
+        onLayout={onLayout}
+        footer={
+          <View className="px-5 pt-2" style={{ paddingBottom: footerPadding }}>
+            <TouchableOpacity
+              className="h-[54px] w-full rounded-[16px] items-center justify-center bg-[#006c50]"
+              style={{
+                shadowColor: "#006c50",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.18,
+                shadowRadius: 6,
+                elevation: 3,
+                opacity: otp.length < OTP_LENGTH && !isBusy ? 0.6 : 1,
+              }}
+              onPress={handleVerify}
+              disabled={isBusy || otp.length < OTP_LENGTH}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+            >
+              {isVerifying ? (
+                <ActivityIndicator size="small" color="#ffffff" />
+              ) : (
+                <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[24px]">
+                  Verifikasi
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Catatan keamanan */}
+            <View className="flex-row items-center justify-center gap-[6px] pt-3">
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={12}
+                color="rgba(116,119,126,0.8)"
+              />
+              <Text className="font-sans text-[rgba(116,119,126,0.8)] text-[11px] font-normal leading-[16.5px]">
+                Kode hanya berlaku sekali dan akan kedaluwarsa
               </Text>
-            </Text>
+            </View>
           </View>
-
-          {/* Divider */}
-          <View style={{ height: 1, backgroundColor: "#dee9fc" }} />
-
-          {/* OTP boxes */}
-          <OtpInput
-            value={otp}
-            onChange={(val) => {
-              setOtp(val);
-              if (otpError) setOtpError(null);
+        }
+      >
+        <View>
+          {/* ── Kartu konten ── */}
+          <View
+            className="w-full rounded-[24px] bg-white px-[25px] py-[22px] mt-4 gap-5"
+            style={{
+              borderWidth: 1,
+              borderColor: "rgba(222,233,252,0.4)",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.04,
+              shadowRadius: 20,
+              elevation: 3,
             }}
-            hasError={!!otpError}
-            editable={!isBusy}
-          />
-
-          {/* Error atau spacer */}
-          {otpError ? (
-            <Text className="font-sans text-red-500 text-[12px] leading-[16px] text-center -mt-2">
-              {otpError}
-            </Text>
-          ) : (
-            <View style={{ height: 4 }} />
-          )}
-
-          {/* Kirim ulang */}
-          <View className="items-center">
-            {cooldown > 0 ? (
-              <Text className="font-sans text-[#74777e] text-[12px] font-normal leading-[18px]">
-                Kirim ulang dalam{" "}
+          >
+            {/* Heading */}
+            <View className="items-center gap-[6px]">
+              <Text className="font-sans text-[#001d37] text-[20px] font-bold tracking-[-0.5px] leading-[25px] text-center">
+                Masukkan Kode OTP
+              </Text>
+              <Text className="font-sans text-[#74777e] text-[13px] font-normal leading-[20px] text-center">
+                Kode 6 digit dikirim ke WhatsApp{"\n"}
                 <Text className="font-sans text-[#001d37] font-semibold">
-                  {formatCountdown(cooldown)}
+                  {phoneDisplay}
                 </Text>
               </Text>
-            ) : (
-              <TouchableOpacity
-                onPress={handleResend}
-                disabled={isResending}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                accessibilityRole="button"
-              >
-                {isResending ? (
-                  <ActivityIndicator size="small" color="#006c50" />
-                ) : (
-                  <Text className="font-sans text-[#006c50] text-[12px] font-semibold leading-[18px]">
-                    Kirim ulang kode
-                  </Text>
-                )}
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
+            </View>
 
-        {/* ── Spacer ── */}
-        <View className="flex-1" />
+            {/* Divider */}
+            <View style={{ height: 1, backgroundColor: "#dee9fc" }} />
 
-        {/* ── Tombol verifikasi ── */}
-        <View className="gap-3 pb-2">
-          <TouchableOpacity
-            className="h-[50px] w-full rounded-[16px] items-center justify-center bg-[#006c50]"
-            style={{
-              shadowColor: "#006c50",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.18,
-              shadowRadius: 6,
-              elevation: 3,
-              opacity: otp.length < OTP_LENGTH && !isBusy ? 0.6 : 1,
-            }}
-            onPress={handleVerify}
-            disabled={isBusy || otp.length < OTP_LENGTH}
-            activeOpacity={0.85}
-            accessibilityRole="button"
-          >
-            {isVerifying ? (
-              <ActivityIndicator size="small" color="#ffffff" />
-            ) : (
-              <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[24px]">
-                Verifikasi
-              </Text>
-            )}
-          </TouchableOpacity>
-
-          {/* Catatan keamanan */}
-          <View className="flex-row items-center justify-center gap-[6px]">
-            <Ionicons
-              name="shield-checkmark-outline"
-              size={12}
-              color="rgba(116,119,126,0.8)"
+            {/* OTP boxes */}
+            <OtpInput
+              value={otp}
+              onChange={(val) => {
+                setOtp(val);
+                if (otpError) setOtpError(null);
+              }}
+              hasError={!!otpError}
+              editable={!isBusy}
+              inputRef={otpInputRef}
             />
-            <Text className="font-sans text-[rgba(116,119,126,0.8)] text-[11px] font-normal leading-[16.5px]">
-              Kode hanya berlaku sekali dan akan kedaluwarsa
-            </Text>
+
+            {/* Error atau ruang kosong — tinggi dicadangkan agar kartu tidak bergeser */}
+            <View className="min-h-[16px] justify-center">
+              {otpError ? (
+                <Text className="font-sans text-red-500 text-[12px] leading-[16px] text-center">
+                  {otpError}
+                </Text>
+              ) : null}
+            </View>
+
+            {/* Kirim ulang — format mm:ss seperti forgot-password */}
+            <View className="items-center">
+              <View className="h-[18px] justify-center">
+                {cooldown > 0 ? (
+                  <Text className="font-sans text-[#74777e] text-[12px] font-normal leading-[18px]">
+                    Kirim ulang dalam{" "}
+                    <Text className="font-sans text-[#001d37] font-semibold">
+                      {formatCountdown(cooldown)}
+                    </Text>
+                  </Text>
+                ) : (
+                  <TouchableOpacity
+                    onPress={handleResend}
+                    disabled={isResending}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    accessibilityRole="button"
+                  >
+                    {isResending ? (
+                      <ActivityIndicator size="small" color="#006c50" />
+                    ) : (
+                      <Text className="font-sans text-[#006c50] text-[12px] font-semibold leading-[18px]">
+                        Kirim ulang kode
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
           </View>
         </View>
-      </View>
+      </KeyboardScreen>
     </View>
   );
 }

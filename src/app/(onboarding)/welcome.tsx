@@ -1,8 +1,18 @@
 import { AmbientBlob } from "@/components/ui/AmbientBlob";
+import { StepDots } from "@/components/ui/StepIndicator";
+import { useAuthStore } from "@/features/auth/authStore";
 import { useOnboardingStore } from "@/features/onboarding/onboardingStore";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { useRouter } from "expo-router";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // ─── Aset lokal ───────────────────────────────────────────────────────────────
 const logoIcon = require("@/assets/images/logo-icon-cashify.png");
@@ -24,35 +34,25 @@ const FEATURES = [
   },
 ] as const;
 
-// ─── Dot Step Indicator ───────────────────────────────────────────────────────
-function StepDots({ active }: { active: number }) {
-  return (
-    <View className="flex-row items-center justify-center gap-2">
-      {[0, 1, 2].map((i) => (
-        <View
-          key={i}
-          style={{
-            width: i === active ? 8 : 6,
-            height: i === active ? 8 : 6,
-            borderRadius: 9999,
-            backgroundColor: i === active ? "#001d37" : "#c4c6ce",
-          }}
-        />
-      ))}
-    </View>
-  );
-}
-
 // ─── Komponen ─────────────────────────────────────────────────────────────────
 export default function WelcomeScreen() {
   const router = useRouter();
   const markWelcomeDone = useOnboardingStore((s) => s.markWelcomeDone);
+  const fullName = useAuthStore((s) => s.user?.full_name ?? "");
+  const insets = useSafeAreaInsets();
+  // markWelcomeDone menulis SecureStore, jadi beri indikator selama menunggu
+  const [isStarting, setIsStarting] = useState(false);
 
   // Replace, bukan push: onboarding hanya maju, dan saat resume layar ini
   // tidak boleh muncul lagi di bawah layar berikutnya
   const handleStart = async () => {
-    await markWelcomeDone();
-    router.replace("/(onboarding)/initial-balance");
+    setIsStarting(true);
+    try {
+      await markWelcomeDone();
+      router.replace("/(onboarding)/initial-balance");
+    } finally {
+      setIsStarting(false);
+    }
   };
 
   return (
@@ -66,7 +66,13 @@ export default function WelcomeScreen() {
         className="left-[-80px] bottom-[-96px] w-[288px] h-[288px]"
       />
 
-      <View className="flex-1 px-5 pt-14 pb-6 justify-between">
+      <View
+        className="flex-1 px-5 justify-between"
+        style={{
+          paddingTop: insets.top + 16,
+          paddingBottom: insets.bottom + 16,
+        }}
+      >
         {/* ── Logo ── */}
         <View className="items-center pt-2">
           <Image
@@ -85,7 +91,7 @@ export default function WelcomeScreen() {
         <View className="gap-6">
           <View className="items-center gap-2 px-1">
             <Text className="font-sans text-[#001d37] text-[24px] font-bold leading-[32px] tracking-[-0.6px] text-center">
-              Halo! 👋
+              Halo!{fullName ? ` ${fullName}` : ""}
             </Text>
             <Text className="font-sans text-[#43474d] text-[14px] font-normal leading-[20px] text-center">
               Yuk, kendalikan keuanganmu.
@@ -130,7 +136,7 @@ export default function WelcomeScreen() {
         <View className="gap-4 items-center">
           <StepDots active={0} />
           <TouchableOpacity
-            className="h-[50px] w-full rounded-[16px] items-center justify-center bg-[#006c50]"
+            className="h-[54px] w-full rounded-[16px] items-center justify-center bg-[#006c50]"
             style={{
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 1 },
@@ -139,12 +145,17 @@ export default function WelcomeScreen() {
               elevation: 1,
             }}
             onPress={handleStart}
+            disabled={isStarting}
             activeOpacity={0.85}
             accessibilityRole="button"
           >
-            <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[24px]">
-              Mulai Sekarang
-            </Text>
+            {isStarting ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[24px]">
+                Mulai Sekarang
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       </View>
