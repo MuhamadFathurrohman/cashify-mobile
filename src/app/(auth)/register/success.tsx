@@ -17,10 +17,12 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // ─── Komponen ─────────────────────────────────────────────────────────────────
 export default function RegisterSuccessScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { result } = useRegisterFlow();
   const { mutate: complete, isPending, isSuccess } = useCompleteRegistration();
 
@@ -83,7 +85,7 @@ export default function RegisterSuccessScreen() {
         className="left-[-80px] bottom-[-96px] w-[288px] h-[288px]"
       />
 
-      <View className="flex-1 px-5 pt-14 pb-4">
+      <View className="flex-1 px-5 pt-14">
         {/* ── Kartu sukses ── */}
         <View className="flex-1 justify-center">
           <View
@@ -116,13 +118,15 @@ export default function RegisterSuccessScreen() {
 
             <Text className="font-sans text-[#43474d] text-[13px] font-normal leading-[21px] text-center">
               Selamat datang di Cashify,{" "}
-              <Text className="font-sans text-[#001d37] font-semibold">{firstName}</Text>.
-              Kamu akan otomatis masuk ke akunmu. Lanjutkan untuk mengatur
+              <Text className="font-sans text-[#001d37] font-semibold">
+                {firstName}
+              </Text>
+              . Kamu akan otomatis masuk ke akunmu. Lanjutkan untuk mengatur
               keuanganmu.
             </Text>
 
             <TouchableOpacity
-              className="mt-5 h-[54px] rounded-[16px] flex-row gap-2 items-center justify-center bg-[#006c50]"
+              className="mt-8 h-[54px] w-full rounded-[16px] flex-row gap-2 items-center justify-center bg-[#006c50]"
               style={{
                 shadowColor: "#006c50",
                 shadowOffset: { width: 0, height: 8 },
@@ -138,19 +142,19 @@ export default function RegisterSuccessScreen() {
               {isBusy ? (
                 <ActivityIndicator size="small" color="#ffffff" />
               ) : (
-                <>
-                  <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
-                    Lanjutkan
-                  </Text>
-                  <Ionicons name="arrow-forward" size={14} color="#ffffff" />
-                </>
+                <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
+                  Lanjutkan
+                </Text>
               )}
             </TouchableOpacity>
           </View>
         </View>
 
         {/* ── Catatan keamanan ── */}
-        <View className="w-full flex-row items-center justify-center gap-[6px] pt-4 pb-2">
+        <View
+          className="w-full flex-row items-center justify-center gap-[6px] pt-4"
+          style={{ paddingBottom: insets.bottom + 16 }}
+        >
           <Ionicons
             name="shield-checkmark-outline"
             size={12}

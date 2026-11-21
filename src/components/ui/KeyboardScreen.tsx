@@ -14,6 +14,9 @@ interface KeyboardScreenProps {
   scrollRef?: Ref<ScrollViewInstance>;
   className?: string;
   contentContainerClassName?: string;
+  // "on-drag" menutup keyboard saat daftar digulir; layar yang membutuhkan
+  // konten di bawah keyboard (mis. opsi login lain) dapat mengaktifkannya.
+  keyboardDismissMode?: ScrollViewProps["keyboardDismissMode"];
   onLayout?: ScrollViewProps["onLayout"];
   onContentSizeChange?: ScrollViewProps["onContentSizeChange"];
 }
@@ -27,6 +30,7 @@ export function KeyboardScreen({
   scrollRef,
   className,
   contentContainerClassName,
+  keyboardDismissMode,
   onLayout,
   onContentSizeChange,
 }: KeyboardScreenProps) {
@@ -39,6 +43,7 @@ export function KeyboardScreen({
         ref={scrollRef}
         className="flex-1"
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={keyboardDismissMode}
         showsVerticalScrollIndicator={false}
         contentContainerClassName={contentContainerClassName}
         onLayout={onLayout}
