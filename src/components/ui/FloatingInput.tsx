@@ -131,6 +131,10 @@ export function FloatingInput({
             style={{ top: 11 }}
             onPress={() => setShowPassword((prev) => !prev)}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel={
+              showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"
+            }
           >
             <Ionicons
               name={showPassword ? "eye-outline" : "eye-off-outline"}

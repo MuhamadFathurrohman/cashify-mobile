@@ -1,6 +1,7 @@
 import { AmbientBlob } from "@/components/ui/AmbientBlob";
 import { FloatingInput } from "@/components/ui/FloatingInput";
 import { KeyboardScreen } from "@/components/ui/KeyboardScreen";
+import { notify } from "@/components/ui/notify";
 import { StepIndicator } from "@/components/ui/StepIndicator";
 import { useRegisterFlow } from "@/features/auth/RegisterContext";
 import {
@@ -53,7 +54,7 @@ export default function RegisterAccountScreen() {
   };
 
   const handleGoogleRegister = () => {
-    // TODO: implementasi Google OAuth bersama tombol di login — tunggu endpoint /auth/google siap
+    notify.info("Segera Hadir", "Daftar dengan Google akan segera tersedia.");
   };
 
   // Bila layar dibuka tanpa riwayat (mis. deep link), kembali tidak mungkin
