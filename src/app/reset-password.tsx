@@ -1,48 +1,49 @@
 import { AmbientBlob } from "@/components/ui/AmbientBlob";
 import { FloatingInput } from "@/components/ui/FloatingInput";
+import { KeyboardScreen } from "@/components/ui/KeyboardScreen";
 import { notify } from "@/components/ui/notify";
+import { useAuthStore } from "@/features/auth/authStore";
 import {
-    getPasswordRequirements,
-    getPasswordStrength,
+  getPasswordRequirements,
+  getPasswordStrength,
 } from "@/features/auth/passwordPolicy";
 import { resolveResetPasswordError } from "@/features/auth/passwordRecoveryErrors";
 import { PasswordRequirements } from "@/features/auth/PasswordRequirements";
 import { PasswordStrengthMeter } from "@/features/auth/PasswordStrengthMeter";
 import {
-    clearRecoveryLink,
-    getRecoveryLink,
-    subscribeRecoveryLink,
+  clearRecoveryLink,
+  getRecoveryLink,
+  subscribeRecoveryLink,
 } from "@/features/auth/recoveryLinkStore";
 import {
-    resetPasswordSchema,
-    type ResetPasswordForm,
+  resetPasswordSchema,
+  type ResetPasswordForm,
 } from "@/features/auth/recoverySchemas";
 import { useResetPassword } from "@/features/auth/useAuth";
-import { useAuthStore } from "@/features/auth/authStore";
+import { useKeyboardAwareScreen } from "@/hooks/useKeyboardAwareScreen";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { useFocusEffect, useRouter } from "expo-router";
 import {
-    ComponentRef,
-    useCallback,
-    useEffect,
-    useRef,
-    useState,
-    useSyncExternalStore,
+  ComponentRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
 } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import {
-    ActivityIndicator,
-    BackHandler,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  BackHandler,
+  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import Animated, { FadeOut, LinearTransition } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const logoIcon = require("@/assets/images/logo-icon-cashify.png");
 const logoText = require("@/assets/images/logo-text-cashify.png");
@@ -59,6 +60,10 @@ const cardShadow = {
 export default function ResetPasswordScreen() {
   const router = useRouter();
   const confirmRef = useRef<ComponentRef<typeof TextInput>>(null);
+  const simpanRef = useRef<ComponentRef<typeof TouchableOpacity>>(null);
+  const insets = useSafeAreaInsets();
+  const { scrollRef, keyboardVisible, viewportHeight, onLayout } =
+    useKeyboardAwareScreen({ scrollTo: simpanRef });
   // Token ditangkap di root sebelum layar ini terpasang; layar hanya membaca
   const link = useSyncExternalStore(subscribeRecoveryLink, getRecoveryLink);
   const { mutate: resetPassword, isPending } = useResetPassword();
@@ -159,10 +164,7 @@ export default function ResetPasswordScreen() {
   const isMatch = password !== "" && password === confirmPassword;
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-[#f8f9ff]"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <View className="flex-1 bg-[#f8f9ff]">
       <AmbientBlob
         color="green"
         className="right-[-80px] top-[-96px] w-[288px] h-[288px]"
@@ -172,113 +174,153 @@ export default function ResetPasswordScreen() {
         className="left-[-80px] bottom-[-96px] w-[288px] h-[288px]"
       />
 
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+      <KeyboardScreen
+        className="bg-none"
+        scrollRef={scrollRef}
+        contentContainerClassName="grow"
+        keyboardDismissMode="on-drag"
+        onLayout={onLayout}
       >
-        <View className="flex-1 justify-between px-6 pt-16 pb-4 gap-6">
+        <View
+          className={`grow justify-between gap-6 px-6 ${
+            keyboardVisible ? "pt-[50px]" : "pt-20"
+          }`}
+          style={viewportHeight > 0 ? { minHeight: viewportHeight } : undefined}
+        >
           <View className="w-full">
             {/* ── Logo ── */}
-            <View className="w-full items-center pb-5">
-              <Image
-                source={logoIcon}
-                className="w-[64px] h-[59px]"
-                resizeMode="contain"
-              />
-              <View className="pt-2">
+            {/* Saat keyboard terbuka logo diringkas jadi satu baris agar tombol
+                "Simpan Kata Sandi Baru" tetap terlihat di atas keyboard. */}
+            <Animated.View
+              layout={LinearTransition.duration(180)}
+              style={{ width: "100%" }}
+            >
+              <View
+                className={
+                  keyboardVisible
+                    ? "w-full flex-row items-center justify-center gap-[5px] pb-3"
+                    : "w-full items-center pb-5"
+                }
+              >
                 <Image
-                  source={logoText}
-                  className="w-[72px] h-[22px]"
+                  source={logoIcon}
+                  className={
+                    keyboardVisible ? "w-[60px] h-[60px]" : "w-[86px] h-[79px]"
+                  }
                   resizeMode="contain"
                 />
+                <View className={keyboardVisible ? "items-center" : "pt-2"}>
+                  <Image
+                    source={logoText}
+                    className={
+                      keyboardVisible
+                        ? "w-[77px] h-[24px] mt-3"
+                        : "w-[87px] h-[27px]"
+                    }
+                    resizeMode="contain"
+                  />
+                </View>
               </View>
-            </View>
+            </Animated.View>
 
             {link?.kind === "token" || done ? (
               /* ── Form reset ── */
               <>
-                <View className="items-center gap-[3px] pb-5">
-                  <Text className="font-sans text-[#001d37] text-[22px] font-bold leading-[27.5px] text-center">
-                    Reset Kata Sandi
-                  </Text>
-                  <Text className="font-sans text-[#74777e] text-[13px] font-normal leading-[19.5px] text-center max-w-[270px]">
-                    Buat kata sandi baru yang kuat untuk akunmu.
-                  </Text>
-                </View>
+                {/* Judul hilang saat keyboard terbuka */}
+                {!keyboardVisible && (
+                  <Animated.View
+                    exiting={FadeOut.duration(120)}
+                    style={{ width: "100%" }}
+                  >
+                    <View className="items-center gap-[3px] pb-5">
+                      <Text className="font-sans text-[#001d37] text-[22px] font-bold leading-[27.5px] text-center">
+                        Reset Kata Sandi
+                      </Text>
+                      <Text className="font-sans text-[#74777e] text-[13px] font-normal leading-[19.5px] text-center max-w-[270px]">
+                        Buat kata sandi baru yang kuat untuk akunmu.
+                      </Text>
+                    </View>
+                  </Animated.View>
+                )}
 
-                <View
-                  className="w-full rounded-[28px] bg-white border border-[#edf1f7] p-[21px] gap-4"
-                  style={cardShadow}
+                <Animated.View
+                  layout={LinearTransition.duration(180)}
+                  style={{ width: "100%" }}
                 >
-                  <View className="gap-[6px]">
-                    <Controller
-                      control={control}
-                      name="password"
-                      render={({ field: { onChange, onBlur, value } }) => (
-                        <FloatingInput
-                          label="Kata Sandi Baru"
-                          placeholder="Buat kata sandi baru"
-                          secureTextEntry
-                          autoCapitalize="none"
-                          autoCorrect={false}
-                          autoComplete="new-password"
-                          textContentType="newPassword"
-                          returnKeyType="next"
-                          onSubmitEditing={() => confirmRef.current?.focus()}
-                          onBlur={onBlur}
-                          onChangeText={onChange}
-                          value={value}
-                          error={errors.password?.message}
-                          editable={!busy}
-                        />
-                      )}
-                    />
-                    <PasswordStrengthMeter strength={strength} />
-                  </View>
+                  <View
+                    className="w-full rounded-[28px] bg-white border border-[#edf1f7] p-[21px] gap-4"
+                    style={cardShadow}
+                  >
+                    <View className="gap-[6px]">
+                      <Controller
+                        control={control}
+                        name="password"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                          <FloatingInput
+                            label="Kata Sandi Baru"
+                            placeholder="Buat kata sandi baru"
+                            secureTextEntry
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            autoComplete="new-password"
+                            textContentType="newPassword"
+                            returnKeyType="next"
+                            onSubmitEditing={() => confirmRef.current?.focus()}
+                            onBlur={onBlur}
+                            onChangeText={onChange}
+                            value={value}
+                            error={errors.password?.message}
+                            editable={!busy}
+                          />
+                        )}
+                      />
+                      <PasswordStrengthMeter strength={strength} />
+                    </View>
 
-                  <View className="gap-[6px]">
-                    <Controller
-                      control={control}
-                      name="confirm_password"
-                      render={({ field: { onChange, onBlur, value } }) => (
-                        <FloatingInput
-                          ref={confirmRef}
-                          label="Konfirmasi Kata Sandi Baru"
-                          placeholder="Ulangi kata sandi baru"
-                          secureTextEntry
-                          autoCapitalize="none"
-                          autoCorrect={false}
-                          autoComplete="new-password"
-                          textContentType="newPassword"
-                          returnKeyType="done"
-                          onSubmitEditing={() => handleSubmit(onSubmit)()}
-                          onBlur={onBlur}
-                          onChangeText={onChange}
-                          value={value}
-                          error={errors.confirm_password?.message}
-                          editable={!busy}
-                        />
+                    <View className="gap-[6px]">
+                      <Controller
+                        control={control}
+                        name="confirm_password"
+                        render={({ field: { onChange, onBlur, value } }) => (
+                          <FloatingInput
+                            ref={confirmRef}
+                            label="Konfirmasi Kata Sandi Baru"
+                            placeholder="Ulangi kata sandi baru"
+                            secureTextEntry
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            autoComplete="new-password"
+                            textContentType="newPassword"
+                            returnKeyType="done"
+                            onSubmitEditing={() => handleSubmit(onSubmit)()}
+                            onBlur={onBlur}
+                            onChangeText={onChange}
+                            value={value}
+                            error={errors.confirm_password?.message}
+                            editable={!busy}
+                          />
+                        )}
+                      />
+                      {isMatch && (
+                        <View className="flex-row items-center gap-[6px] pt-[2px]">
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={13}
+                            color="#006c50"
+                          />
+                          <Text className="font-sans text-[#006c50] text-[11px] font-normal leading-[16.5px]">
+                            Kata sandi cocok
+                          </Text>
+                        </View>
                       )}
-                    />
-                    {isMatch && (
-                      <View className="flex-row items-center gap-[6px] pt-[2px]">
-                        <Ionicons
-                          name="checkmark-circle"
-                          size={13}
-                          color="#006c50"
-                        />
-                        <Text className="font-sans text-[#006c50] text-[11px] font-normal leading-[16.5px]">
-                          Kata sandi cocok
-                        </Text>
-                      </View>
-                    )}
-                  </View>
+                    </View>
 
-                  <PasswordRequirements items={requirements} />
-                </View>
+                    <PasswordRequirements items={requirements} />
+                  </View>
+                </Animated.View>
 
                 <TouchableOpacity
+                  ref={simpanRef}
                   className="mt-5 h-[54px] rounded-[16px] items-center justify-center bg-[#006c50]"
                   style={{
                     shadowColor: "#006c50",
@@ -353,7 +395,10 @@ export default function ResetPasswordScreen() {
           </View>
 
           {/* ── Catatan keamanan ── */}
-          <View className="w-full flex-row items-center justify-center gap-[6px] pt-4 pb-2">
+          <View
+            className="w-full flex-row items-center justify-center gap-[6px] pt-4"
+            style={{ paddingBottom: insets.bottom + 16 }}
+          >
             <Ionicons
               name="shield-checkmark-outline"
               size={12}
@@ -364,7 +409,7 @@ export default function ResetPasswordScreen() {
             </Text>
           </View>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardScreen>
+    </View>
   );
 }

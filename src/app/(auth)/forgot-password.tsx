@@ -1,5 +1,6 @@
 import { AmbientBlob } from "@/components/ui/AmbientBlob";
 import { FloatingInput } from "@/components/ui/FloatingInput";
+import { KeyboardScreen } from "@/components/ui/KeyboardScreen";
 import { notify } from "@/components/ui/notify";
 import { ForgotPasswordSent } from "@/features/auth/ForgotPasswordSent";
 import {
@@ -12,6 +13,7 @@ import {
   type ForgotPasswordForm,
 } from "@/features/auth/recoverySchemas";
 import { useForgotPassword } from "@/features/auth/useAuth";
+import { useKeyboardAwareScreen } from "@/hooks/useKeyboardAwareScreen";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { Stack, useFocusEffect, useRouter } from "expo-router";
@@ -21,13 +23,11 @@ import {
   ActivityIndicator,
   BackHandler,
   Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const logoIcon = require("@/assets/images/logo-icon-cashify.png");
 const logoText = require("@/assets/images/logo-text-cashify.png");
@@ -47,6 +47,10 @@ export default function ForgotPasswordScreen() {
   const [sentEmail, setSentEmail] = useState<string | null>(null);
   const { mutate: sendLink, isPending } = useForgotPassword();
   const startCooldown = useForgotPasswordCooldown((s) => s.start);
+  const insets = useSafeAreaInsets();
+  // Layar ini hanya punya satu input, jadi tidak butuh branding ringkas maupun
+  // auto-scroll; hook dipakai untuk tinggi viewport dan posisi footer saja.
+  const { scrollRef, viewportHeight, onLayout } = useKeyboardAwareScreen();
 
   const {
     control,
@@ -114,10 +118,7 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-[#f8f9ff]"
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <View className="flex-1 bg-[#f8f9ff]">
       {/* Swipe-back iOS dimatikan di state terkirim; back dikendalikan layar */}
       <Stack.Screen options={{ gestureEnabled: !sentEmail }} />
 
@@ -130,12 +131,17 @@ export default function ForgotPasswordScreen() {
         className="left-[-80px] bottom-[-96px] w-[288px] h-[288px]"
       />
 
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+      <KeyboardScreen
+        className="bg-none"
+        scrollRef={scrollRef}
+        contentContainerClassName="grow"
+        keyboardDismissMode="on-drag"
+        onLayout={onLayout}
       >
-        <View className="flex-1 justify-between px-5 pt-14 pb-4 gap-6">
+        <View
+          className="grow justify-between px-5 pt-14 gap-6"
+          style={viewportHeight > 0 ? { minHeight: viewportHeight } : undefined}
+        >
           <View className="w-full">
             {/* ── Navigasi kembali ── */}
             <View className="h-11 justify-center">
@@ -230,11 +236,6 @@ export default function ForgotPasswordScreen() {
                         <Text className="font-sans text-white text-[16px] font-semibold tracking-[-0.16px] leading-[22px]">
                           Kirim Tautan Reset
                         </Text>
-                        <Ionicons
-                          name="arrow-forward"
-                          size={14}
-                          color="#ffffff"
-                        />
                       </>
                     )}
                   </TouchableOpacity>
@@ -259,7 +260,10 @@ export default function ForgotPasswordScreen() {
           </View>
 
           {/* ── Catatan keamanan ── */}
-          <View className="w-full flex-row items-center justify-center gap-[6px] pt-4 pb-2">
+          <View
+            className="w-full flex-row items-center justify-center gap-[6px] pt-4"
+            style={{ paddingBottom: insets.bottom + 16 }}
+          >
             <Ionicons
               name="shield-checkmark-outline"
               size={12}
@@ -270,7 +274,7 @@ export default function ForgotPasswordScreen() {
             </Text>
           </View>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardScreen>
+    </View>
   );
 }

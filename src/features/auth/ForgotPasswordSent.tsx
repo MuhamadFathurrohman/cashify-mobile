@@ -1,6 +1,6 @@
 import {
-    formatCountdown,
-    useCooldownRemaining,
+  formatCountdown,
+  useCooldownRemaining,
 } from "@/features/auth/forgotPasswordCooldown";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
@@ -49,11 +49,15 @@ function ResendButton({
           </>
         )}
       </TouchableOpacity>
-      {remaining > 0 && (
-        <Text className="font-sans text-[#74777e] text-[12px] font-normal leading-[18px]">
-          Tersedia dalam {formatCountdown(remaining)}
-        </Text>
-      )}
+      {/* Tinggi baris countdown selalu dipesan agar kartu tidak menyusut ketika
+          hitungan habis dan tidak menggeser seluruh tata letak layar. */}
+      <View className="h-[18px] justify-center">
+        {remaining > 0 && (
+          <Text className="font-sans text-[#74777e] text-[12px] font-normal leading-[18px]">
+            Tersedia dalam {formatCountdown(remaining)}
+          </Text>
+        )}
+      </View>
     </View>
   );
 }
@@ -85,15 +89,23 @@ export function ForgotPasswordSent({
           Periksa Email Kamu
         </Text>
         <Text className="font-sans text-[#43474d] text-[13px] font-normal leading-[20px] text-center">
-          Jika <Text className="font-sans text-[#001d37] font-semibold">{email}</Text>{" "}
+          Jika{" "}
+          <Text className="font-sans text-[#001d37] font-semibold">
+            {email}
+          </Text>{" "}
           terdaftar, kami akan mengirim tautan untuk mereset kata sandi.
         </Text>
       </View>
 
-      <View className="w-full flex-row items-center gap-2 rounded-[12px] bg-[#dee9fc] px-8 py-3">
-        <Ionicons name="information-circle-outline" size={16} color="#43474d" />
+      <View className="w-full flex-row items-start gap-2 rounded-[12px] bg-[#dee9fc] px-4 py-3">
+        <Ionicons
+          name="information-circle-outline"
+          size={16}
+          color="#43474d"
+          style={{ marginTop: 1 }}
+        />
         <Text className="font-sans flex-1 text-[#43474d] text-[12px] font-normal leading-[18px]">
-          Tidak menemukan email? Cek folder Spam
+          Email belum masuk? Cek folder Spam atau Promosi.
         </Text>
       </View>
 
