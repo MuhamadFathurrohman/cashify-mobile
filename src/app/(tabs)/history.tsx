@@ -1,3 +1,4 @@
+import { useTabBarClearance } from "@/components/ui/BottomTabBar";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { RefreshErrorBanner } from "@/components/ui/RefreshErrorBanner";
 import { HistoryHeader } from "@/features/transactions/history/HistoryHeader";
@@ -46,6 +47,7 @@ function GroupSeparator() {
 
 export default function HistoryScreen() {
   const queryClient = useQueryClient();
+  const tabBarSpace = useTabBarClearance();
 
   const [filters, setFilters] = useState<ActiveFilters>({});
   const [type, setType] = useState<TransactionType | undefined>(undefined);
@@ -191,7 +193,7 @@ export default function HistoryScreen() {
   }
 
   return (
-    // Latar #f8f9ff sama dengan wrapper BottomTabBar (aturan 20)
+    // Latar #f8f9ff dipakai semua layar tab; tab bar kini overlay transparan
     <View className="flex-1 bg-[#f8f9ff]">
       <HistoryHeader
         searchInput={searchInput}
@@ -219,7 +221,7 @@ export default function HistoryScreen() {
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingTop: 16,
-          paddingBottom: 24,
+          paddingBottom: tabBarSpace,
         }}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.3}

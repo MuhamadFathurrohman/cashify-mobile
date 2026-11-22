@@ -1,3 +1,4 @@
+import { useTabBarClearance } from "@/components/ui/BottomTabBar";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { FilterDateRange } from "@/features/transactions/history/filter/FilterDateRange";
 import {
@@ -67,8 +68,9 @@ function clampProgress(value: number) {
 // Satu nilai menggerakkan slide sheet sekaligus memudarkan backdrop agar
 // keduanya selalu bergerak bersamaan.
 //
-// Sheet sengaja BUKAN Modal: overlay-nya hidup di dalam layar History, yang
-// areanya berhenti tepat di atas BottomTabBar. Akibatnya tab bar tetap terlihat
+// Sheet sengaja BUKAN Modal: overlay-nya hidup di dalam layar History. Karena
+// BottomTabBar kini berupa overlay transparan, sheet diberi jarak bawah sebesar
+// tinggi bar supaya tombol aksi tidak tertutup capsule; tab bar tetap terlihat
 // dan tetap bisa ditekan saat sheet terbuka.
 export function TransactionFilterSheet({
   visible,
@@ -79,11 +81,14 @@ export function TransactionFilterSheet({
   onClose,
 }: TransactionFilterSheetProps) {
   const [progress] = useState(() => new Animated.Value(1));
+  const tabBarSpace = useTabBarClearance();
   // Tinggi area layar yang benar-benar tersedia (di atas tab bar), diukur lewat
   // onLayout supaya tidak perlu menebak tinggi tab bar. onLayout hanya terpicu
   // saat layar ini dipasang/berubah ukuran, jauh sebelum sheet bisa dibuka.
   const [availableHeight, setAvailableHeight] = useState(0);
-  const sheetHeight = Math.round(availableHeight * SHEET_MAX_RATIO);
+  const sheetHeight = Math.round(
+    Math.max(availableHeight - tabBarSpace, 0) * SHEET_MAX_RATIO,
+  );
 
   // Kategori dan akun diambil sejak layar ini dipasang, bukan saat sheet dibuka,
   // supaya chip sudah siap ketika pengguna menekan tombol filter. Cache react-query
@@ -96,7 +101,8 @@ export function TransactionFilterSheet({
 
   const translateY = progress.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, sheetHeight],
+    // Ditambah jarak bawah agar sheet benar-benar keluar layar saat tertutup
+    outputRange: [0, sheetHeight + tabBarSpace],
   });
   const backdropOpacity = progress.interpolate({
     inputRange: [0, 1],
@@ -202,7 +208,7 @@ export function TransactionFilterSheet({
               position: "absolute",
               left: 0,
               right: 0,
-              bottom: 0,
+              bottom: tabBarSpace,
               height: sheetHeight,
               backgroundColor: "#ffffff",
               borderTopLeftRadius: 24,

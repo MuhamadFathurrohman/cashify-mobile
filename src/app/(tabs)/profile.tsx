@@ -1,9 +1,11 @@
+import { useTabBarClearance } from "@/components/ui/BottomTabBar";
 import { ComingSoon } from "@/components/ui/ComingSoon";
 import { useLogout } from "@/features/auth/useAuth";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 
 export default function ProfileScreen() {
   const { mutate: logout, isPending } = useLogout();
+  const tabBarSpace = useTabBarClearance();
 
   return (
     <View className="flex-1 bg-[#f8f9ff]">
@@ -14,7 +16,7 @@ export default function ProfileScreen() {
       />
 
       {/* Sementara: untuk berganti akun saat pengujian. Diganti saat layar Profil didesain */}
-      <View className="px-5 pb-6">
+      <View className="px-5" style={{ paddingBottom: tabBarSpace }}>
         <TouchableOpacity
           className="h-[50px] w-full items-center justify-center rounded-[16px] border border-[#f87171] bg-white"
           onPress={() => logout()}

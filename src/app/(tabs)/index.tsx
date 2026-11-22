@@ -1,3 +1,4 @@
+import { useTabBarClearance } from "@/components/ui/BottomTabBar";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { RefreshErrorBanner } from "@/components/ui/RefreshErrorBanner";
 import { useAuthStore } from "@/features/auth/authStore";
@@ -23,6 +24,7 @@ const FALLBACK_ERROR =
 
 export default function HomeScreen() {
   const router = useRouter();
+  const tabBarSpace = useTabBarClearance();
   const fullName = useAuthStore((state) => state.user?.full_name);
   const month = currentMonth();
   const { data, error, isError, isRefetching, refetch } = useDashboard(month);
@@ -78,14 +80,14 @@ export default function HomeScreen() {
   }
 
   return (
-    // Latar #f8f9ff sama dengan wrapper BottomTabBar (aturan 20)
+    // Latar #f8f9ff dipakai semua layar tab; tab bar kini overlay transparan
     <View className="flex-1 bg-[#f8f9ff]">
       <HomeHeader />
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingTop: 12,
-          paddingBottom: 24,
+          paddingBottom: tabBarSpace,
           gap: 20,
         }}
         showsVerticalScrollIndicator={false}
