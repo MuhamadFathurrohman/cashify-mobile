@@ -4,19 +4,20 @@ import {
   SegmentedControl,
   type SegmentOption,
 } from "@/components/ui/SegmentedControl";
+import { useKeyboardAwareScreen } from "@/hooks/useKeyboardAwareScreen";
 import type { Account, TransactionType } from "@/types/api";
 import { formatInputAmount } from "@/utils/currency";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Ionicons from "@react-native-vector-icons/ionicons";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
   Pressable,
-  type ScrollViewInstance,
   Text,
   TextInput,
   View,
+  type ViewInstance,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
@@ -30,6 +31,12 @@ import {
 import { useCategories } from "../useCategories";
 import { CategoryGrid } from "./CategoryGrid";
 import { resolveTransactionError } from "./transactionErrors";
+import {
+  FieldError,
+  ValidationSummary,
+  firstErrorName,
+  hasFieldError,
+} from "./TransactionFormErrors";
 import {
   defaultTransactionValues,
   transactionFormSchema,
@@ -92,21 +99,13 @@ const TYPE_OPTIONS: readonly SegmentOption<TransactionType>[] = [
   },
 ];
 
-const CARD =
-  "rounded-3xl border border-[rgba(196,198,206,0.3)] bg-white p-[17px]";
+const CARD = "rounded-3xl border bg-white p-[17px]";
+const BORDER_NORMAL = "border-[rgba(196,198,206,0.3)]";
+const BORDER_ERROR = "border-[#ba1a1a]";
 const LABEL =
   "font-sans text-xs font-semibold leading-4 tracking-[0.24px] text-[#43474d]";
 const VALUE = "font-sans text-sm font-semibold leading-5 text-[#121c2a]";
 const BUBBLE = "h-10 w-10 items-center justify-center rounded-2xl";
-
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return (
-    <Text className="mt-1 font-sans text-xs leading-4 text-[#ba1a1a]">
-      {message}
-    </Text>
-  );
-}
 
 function dateLabel(value: string): string {
   const long = formatDateLong(value);
@@ -117,9 +116,16 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
   const insets = useSafeAreaInsets();
   const [type, setType] = useState<TransactionType>("expense");
   const [pickerOpen, setPickerOpen] = useState(false);
+  // Banner ringkasan hanya muncul setelah pengguna mencoba menyimpan
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   // POST /transactions tidak idempoten: cegah ketukan ganda sebelum render ulang
   const submittingRef = useRef(false);
-  const scrollRef = useRef<ScrollViewInstance>(null);
+  // Ref kartu non-input supaya banner bisa menggulir ke kolom yang error
+  const categoryCardRef = useRef<ViewInstance>(null);
+  const dateCardRef = useRef<ViewInstance>(null);
+  // Status keyboard dipakai footer untuk mengatur jarak tombol; scrollRef tetap
+  // dipakai handler "gulir ke Catatan" seperti sebelumnya.
+  const { scrollRef, keyboardVisible } = useKeyboardAwareScreen();
   // Ref (bukan state): hanya dibaca di handler layout, tidak memengaruhi render
   const noteFocusedRef = useRef(false);
 
@@ -132,12 +138,34 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
     handleSubmit,
     setValue,
     setError,
+    setFocus,
     clearErrors,
     formState: { errors },
   } = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionFormSchema),
     defaultValues: defaultTransactionValues(account.id),
   });
+
+  // Fokus ke input teks atau gulir ke kartu non-input yang pertama kali error
+  const focusOrScrollToError = useCallback(() => {
+    const name = firstErrorName(errors);
+    if (!name) return;
+    if (name === "amount" || name === "description") {
+      setFocus(name);
+      return;
+    }
+    const target =
+      name === "categoryId" ? categoryCardRef.current : dateCardRef.current;
+    target?.measure((_x, y) => {
+      scrollRef.current?.scrollTo({ y: Math.max(0, y - 80), animated: true });
+    });
+  }, [errors, setFocus, scrollRef]);
+
+  const handleInvalid = useCallback(() => {
+    setSubmitAttempted(true);
+    // Beri waktu render ulang sebelum mengukur/fokus
+    setTimeout(focusOrScrollToError, 50);
+  }, [focusOrScrollToError]);
 
   // Kategori jenis lama tidak valid untuk jenis baru (backend menolak dengan 400)
   const handleTypeChange = (next: TransactionType) => {
@@ -174,6 +202,7 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
       }
       return;
     }
+    setSubmitAttempted(false);
     toast.success(ui.successMessage);
     onDone();
   };
@@ -191,11 +220,18 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
         // paddingBottom mengikuti inset layar (nilai runtime), jadi lewat style.
         <View
           className="border-t border-[rgba(196,198,206,0.3)] bg-[rgba(255,255,255,0.95)] px-5 pt-[21px]"
-          style={{ paddingBottom: Math.max(insets.bottom, 24) }}
+          style={{
+            paddingBottom: keyboardVisible
+              ? 12
+              : Math.max(insets.bottom, 24) + 8,
+          }}
         >
+          {submitAttempted ? (
+            <ValidationSummary errors={errors} onPress={focusOrScrollToError} />
+          ) : null}
           {/* Pressable hanya penangkap sentuhan; warna ada di View di dalamnya */}
           <Pressable
-            onPress={() => handleSubmit(onValid)()}
+            onPress={() => handleSubmit(onValid, handleInvalid)()}
             disabled={createTransaction.isPending}
             accessibilityRole="button"
             accessibilityLabel={ui.saveLabel}
@@ -206,15 +242,14 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
               createTransaction.isPending ? "opacity-80" : "active:opacity-90"
             }
           >
-            <View className="h-[52px] flex-row items-center justify-center gap-2 rounded-2xl bg-[#006c50] shadow-lg shadow-[#006c50]/20">
+            <View className="h-[54px] flex-row items-center justify-center rounded-2xl bg-[#006c50] shadow-lg shadow-[#006c50]/20">
               {createTransaction.isPending ? (
                 <ActivityIndicator color="#ffffff" />
               ) : (
-                <Ionicons name="save-outline" size={20} color="#ffffff" />
+                <Text className="font-sans text-base font-semibold leading-[22px] text-white">
+                  {ui.saveLabel}
+                </Text>
               )}
-              <Text className="font-sans text-base font-semibold leading-[22px] text-white">
-                {ui.saveLabel}
-              </Text>
             </View>
           </Pressable>
         </View>
@@ -231,12 +266,16 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
       />
 
       {/* Nominal */}
-      <View className={CARD}>
+      <View
+        className={`${CARD} ${
+          hasFieldError(errors, "amount") ? BORDER_ERROR : BORDER_NORMAL
+        }`}
+      >
         <Text className={`text-center ${LABEL}`}>Nominal Transaksi</Text>
         <Controller
           control={control}
           name="amount"
-          render={({ field: { value, onChange, onBlur } }) => (
+          render={({ field: { ref, value, onChange, onBlur } }) => (
             <View className="relative mt-4 h-11 w-full items-center justify-center">
               <Text
                 className={`absolute left-3 font-sans text-3xl font-bold ${ui.rpClassName}`}
@@ -244,6 +283,7 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
                 Rp
               </Text>
               <TextInput
+                ref={ref}
                 // Angka panjang mengecil agar tidak terpotong
                 className={`h-11 w-full p-0 text-center font-sans font-bold text-[#121c2a] ${
                   value.length > 11 ? "text-[26px]" : "text-[32px]"
@@ -257,14 +297,16 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
                 // "1.000.000.000" = 13 karakter (batas backend)
                 maxLength={13}
                 accessibilityLabel="Nominal transaksi"
+                aria-invalid={hasFieldError(errors, "amount")}
               />
             </View>
           )}
         />
         {errors.amount?.message ? (
-          <Text className="mt-2 text-center font-sans text-xs leading-4 text-[#ba1a1a]">
-            {errors.amount.message}
-          </Text>
+          <FieldError
+            className="mt-2 justify-center"
+            message={errors.amount.message}
+          />
         ) : (
           <Text className="mt-2 text-center font-sans text-xs leading-4 text-[#43474d]">
             {ui.amountHint}
@@ -273,25 +315,32 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
       </View>
 
       {/* Kategori */}
-      <Controller
-        control={control}
-        name="categoryId"
-        render={({ field: { value, onChange } }) => (
-          <CategoryGrid
-            type={type}
-            categories={categories.data}
-            isPending={categories.isPending}
-            isError={categories.isError}
-            onRetry={() => void categories.refetch()}
-            selectedId={value}
-            onSelect={onChange}
-            error={errors.categoryId?.message}
-          />
-        )}
-      />
+      <View ref={categoryCardRef}>
+        <Controller
+          control={control}
+          name="categoryId"
+          render={({ field: { value, onChange } }) => (
+            <CategoryGrid
+              type={type}
+              categories={categories.data}
+              isPending={categories.isPending}
+              isError={categories.isError}
+              onRetry={() => void categories.refetch()}
+              selectedId={value}
+              onSelect={onChange}
+              error={errors.categoryId?.message}
+            />
+          )}
+        />
+      </View>
 
       {/* Tanggal dan dompet */}
-      <View className={`${CARD} gap-3`}>
+      <View
+        ref={dateCardRef}
+        className={`${CARD} gap-3 ${
+          hasFieldError(errors, "date") ? BORDER_ERROR : BORDER_NORMAL
+        }`}
+      >
         <Controller
           control={control}
           name="date"
@@ -318,7 +367,10 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
                   <Ionicons name="create-outline" size={20} color="#43474d" />
                 </View>
               </Pressable>
-              <FieldError message={errors.date?.message} />
+              <FieldError
+                message={errors.date?.message}
+                className="mt-0"
+              />
               <DatePickerModal
                 visible={pickerOpen}
                 value={value}
@@ -346,7 +398,11 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
       </View>
 
       {/* Catatan */}
-      <View className={CARD}>
+      <View
+        className={`${CARD} ${
+          hasFieldError(errors, "description") ? BORDER_ERROR : BORDER_NORMAL
+        }`}
+      >
         <View className="mb-2 flex-row items-center gap-2">
           <Ionicons name="reorder-three-outline" size={18} color="#43474d" />
           <Text className={LABEL}>Catatan</Text>
@@ -354,9 +410,10 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
         <Controller
           control={control}
           name="description"
-          render={({ field: { value, onChange, onBlur } }) => (
+          render={({ field: { ref, value, onChange, onBlur } }) => (
             <View className="rounded-xl border border-[rgba(196,198,206,0.3)] bg-[#f8f9ff] p-[13px]">
               <TextInput
+                ref={ref}
                 className="min-h-10 p-0 font-sans text-sm leading-5 text-[#121c2a]"
                 value={value}
                 onChangeText={onChange}
@@ -374,6 +431,7 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
                 placeholderTextColor="#74777e"
                 textAlignVertical="top"
                 accessibilityLabel="Catatan transaksi"
+                aria-invalid={hasFieldError(errors, "description")}
               />
             </View>
           )}

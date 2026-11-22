@@ -3,6 +3,7 @@ import type { Category, TransactionType } from "@/types/api";
 import { categoryIconName } from "@/utils/categoryIcon";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { Pressable, Text, View } from "react-native";
+import { FieldError } from "./TransactionFormErrors";
 
 interface CategoryGridProps {
   type: TransactionType;
@@ -167,11 +168,7 @@ export function CategoryGrid({
         </Text>
       ) : null}
 
-      {error ? (
-        <Text className="mt-2 font-sans text-xs leading-4 text-[#ba1a1a]">
-          {error}
-        </Text>
-      ) : null}
+      <FieldError message={error} className="mt-2" />
     </View>
   );
 }
