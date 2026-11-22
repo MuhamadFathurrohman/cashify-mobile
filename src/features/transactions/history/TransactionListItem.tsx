@@ -1,7 +1,9 @@
 import type { Transaction } from "@/types/api";
 import { categoryIconName } from "@/utils/categoryIcon";
+import { formatJakartaTime } from "@/utils/jakartaDates";
 import { formatExpense, formatIncome } from "@/utils/money";
 import Ionicons from "@react-native-vector-icons/ionicons";
+import { memo } from "react";
 import { Pressable, Text, View } from "react-native";
 
 export const INCOME_COLOR = "#27ae86";
@@ -21,7 +23,7 @@ interface TransactionListItemProps {
   onPress?: () => void;
 }
 
-export function TransactionListItem({
+export const TransactionListItem = memo(function TransactionListItem({
   item,
   onPress,
 }: TransactionListItemProps) {
@@ -30,13 +32,14 @@ export function TransactionListItem({
   const bubbleBg = isIncome ? "rgba(39,174,134,0.12)" : "rgba(240,120,90,0.12)";
   const description = item.description?.trim();
   const sourceLabel = SOURCE_LABELS[item.source];
+  const time = item.occured_at ? formatJakartaTime(item.occured_at) : "";
 
   return (
     <Pressable
       onPress={onPress}
       disabled={!onPress}
       accessibilityRole={onPress ? "button" : "text"}
-      accessibilityLabel={`${description || item.category.name}, ${isIncome ? "pemasukan" : "pengeluaran"} ${isIncome ? formatIncome(item.amount) : formatExpense(item.amount)}`}
+      accessibilityLabel={`${description || item.category.name}, ${isIncome ? "pemasukan" : "pengeluaran"} ${isIncome ? formatIncome(item.amount) : formatExpense(item.amount)}${time ? `, pukul ${time}` : ""}`}
       android_ripple={onPress ? { color: "rgba(0,0,0,0.04)" } : undefined}
       className="flex-row items-center justify-between px-1 py-[10px]"
     >
@@ -63,7 +66,7 @@ export function TransactionListItem({
             className="font-sans text-xs leading-4 text-[#43474d]"
             numberOfLines={1}
           >
-            {`${item.category.name} • ${sourceLabel}`}
+            {`${item.category.name} • ${sourceLabel}${time ? ` • ${time}` : ""}`}
           </Text>
         </View>
       </View>
@@ -79,4 +82,4 @@ export function TransactionListItem({
       </View>
     </Pressable>
   );
-}
+});

@@ -1,5 +1,6 @@
 import type { Transaction } from "@/types/api";
 import { formatRelativeDate } from "@/utils/jakartaDates";
+import { memo } from "react";
 import { Text, View } from "react-native";
 import { formatDateLong } from "../transactionRules";
 import { TransactionListItem } from "./TransactionListItem";
@@ -41,7 +42,11 @@ function groupLabel(date: string): string {
 }
 
 // Satu kelompok tanggal: label di atas, item dalam satu kartu dengan pemisah antar item.
-export function TransactionDateGroup({ group }: { group: DateGroup }) {
+export const TransactionDateGroup = memo(function TransactionDateGroup({
+  group,
+}: {
+  group: DateGroup;
+}) {
   return (
     <View className="gap-[10px]">
       <Text className="font-sans px-1 text-xs font-semibold leading-4 tracking-[0.3px] text-[#43474d]">
@@ -63,4 +68,4 @@ export function TransactionDateGroup({ group }: { group: DateGroup }) {
       </View>
     </View>
   );
-}
+});

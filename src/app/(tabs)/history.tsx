@@ -3,6 +3,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { RefreshErrorBanner } from "@/components/ui/RefreshErrorBanner";
 import { HistoryHeader } from "@/features/transactions/history/HistoryHeader";
 import {
+  type DateGroup,
   TransactionDateGroup,
   groupByDate,
 } from "@/features/transactions/history/TransactionDateGroup";
@@ -34,6 +35,9 @@ import { FlatList, Keyboard, RefreshControl, View } from "react-native";
 const SEARCH_DEBOUNCE_MS = 400;
 const FALLBACK_ERROR =
   "Riwayat transaksi belum bisa dimuat. Coba lagi sebentar lagi.";
+
+// Fungsi stabil di luar komponen: tidak dibuat ulang tiap render (TH-10 Tahap 2)
+const keyExtractor = (group: DateGroup) => group.date;
 
 function errorMessage(error: unknown): string {
   return error instanceof ApiRequestError && error.code === "NETWORK_ERROR"
@@ -157,40 +161,76 @@ export default function HistoryScreen() {
     setType(undefined);
   }, []);
 
-  const listHeader = (
-    <View className="gap-3 pb-4">
-      {showRefreshError ? (
-        <RefreshErrorBanner onRetry={() => void handleRefresh()} />
-      ) : null}
-      <TransactionSummaryCard
-        summary={summary.summary}
-        isLoading={summary.isLoading}
-        isError={summary.isError}
-        onRetry={summary.retry}
-      />
-    </View>
+  // renderItem/header/footer/empty dibuat sekali agar FlatList tidak menerima
+  // elemen baru tiap render (TH-10 Tahap 2).
+  const renderItem = useCallback(
+    ({ item }: { item: DateGroup }) => <TransactionDateGroup group={item} />,
+    [],
   );
 
-  let emptyContent;
-  if (isPending) {
-    emptyContent = <TransactionListSkeleton />;
-  } else if (isError) {
-    emptyContent = (
-      <ErrorState
-        message={errorMessage(error)}
-        onRetry={() => void refetch()}
-        retrying={list.isRefetching}
-      />
-    );
-  } else {
-    emptyContent = (
+  const listHeader = useMemo(
+    () => (
+      <View className="gap-3 pb-4">
+        {showRefreshError ? (
+          <RefreshErrorBanner onRetry={() => void handleRefresh()} />
+        ) : null}
+        <TransactionSummaryCard
+          summary={summary.summary}
+          isLoading={summary.isLoading}
+          isError={summary.isError}
+          onRetry={summary.retry}
+        />
+      </View>
+    ),
+    [
+      showRefreshError,
+      handleRefresh,
+      summary.summary,
+      summary.isLoading,
+      summary.isError,
+      summary.retry,
+    ],
+  );
+
+  const emptyContent = useMemo(() => {
+    if (isPending) return <TransactionListSkeleton />;
+    if (isError) {
+      return (
+        <ErrorState
+          message={errorMessage(error)}
+          onRetry={() => void refetch()}
+          retrying={list.isRefetching}
+        />
+      );
+    }
+    return (
       <TransactionEmptyState
         filtered={isFiltered}
         canResetFilters={hasActiveFilters}
         onResetFilters={handleResetFilters}
       />
     );
-  }
+  }, [
+    isPending,
+    isError,
+    error,
+    refetch,
+    list.isRefetching,
+    isFiltered,
+    hasActiveFilters,
+    handleResetFilters,
+  ]);
+
+  const listFooter = useMemo(
+    () => (
+      <TransactionListFooter
+        isFetchingNextPage={isFetchingNextPage}
+        isFetchNextPageError={isFetchNextPageError}
+        onRetry={() => void fetchNextPage()}
+      />
+    ),
+    [isFetchingNextPage, isFetchNextPageError, fetchNextPage],
+  );
 
   return (
     // Latar #f8f9ff dipakai semua layar tab; tab bar kini overlay transparan
@@ -206,18 +246,12 @@ export default function HistoryScreen() {
 
       <FlatList
         data={groups}
-        keyExtractor={(group) => group.date}
-        renderItem={({ item }) => <TransactionDateGroup group={item} />}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
         ItemSeparatorComponent={GroupSeparator}
         ListHeaderComponent={listHeader}
         ListEmptyComponent={emptyContent}
-        ListFooterComponent={
-          <TransactionListFooter
-            isFetchingNextPage={isFetchingNextPage}
-            isFetchNextPageError={isFetchNextPageError}
-            onRetry={() => void fetchNextPage()}
-          />
-        }
+        ListFooterComponent={listFooter}
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingTop: 16,
