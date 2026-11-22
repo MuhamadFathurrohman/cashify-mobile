@@ -9,7 +9,7 @@ interface UIStore {
 }
 
 export const useUIStore = create<UIStore>((set) => ({
-    isBalanceHidden: false,
+    isBalanceHidden: true,
     toggleBalanceVisibility: () =>
         set((state) => ({ isBalanceHidden: !state.isBalanceHidden })),
 

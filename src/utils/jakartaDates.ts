@@ -63,3 +63,15 @@ export function formatRelativeDate(date: string, now: Date = new Date()): string
     const base = `${day} ${MONTHS_SHORT[month - 1]}`;
     return year === j.getUTCFullYear() ? base : `${base} ${year}`;
 }
+
+// ISO UTC dari backend (`occured_at`) -> "HH.mm" menurut Asia/Jakarta.
+// Menggeser manual seperti helper tanggal lain agar tidak bergantung zona perangkat.
+// String yang tidak valid dikembalikan kosong supaya pemanggil bisa jatuh ke tanggal saja.
+export function formatJakartaTime(iso: string): string {
+    const parsed = new Date(iso);
+    if (Number.isNaN(parsed.getTime())) return "";
+    const j = toJakarta(parsed);
+    const hours = String(j.getUTCHours()).padStart(2, "0");
+    const minutes = String(j.getUTCMinutes()).padStart(2, "0");
+    return `${hours}.${minutes}`;
+}

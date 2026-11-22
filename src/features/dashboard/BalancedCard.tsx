@@ -1,11 +1,11 @@
+import { useUIStore } from "@/stores/ui.store";
 import {
-  HIDDEN_AMOUNT,
-  formatBalance,
+  HIDDEN_DIGITS,
+  balanceParts,
   formatExpense,
   formatIncome,
 } from "@/utils/money";
 import Ionicons from "@react-native-vector-icons/ionicons";
-import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
 
@@ -96,8 +96,11 @@ function SummaryTile({
 // Kartu ringkasan: saldo total (seluruh waktu) dan pemasukan/pengeluaran bulan ini.
 // Badge "Utama" dari desain tidak dipakai (keputusan 6: saldo agregat, bukan per dompet).
 export function BalanceCard({ balance, income, expense }: BalanceCardProps) {
-  // Hanya state lokal, tidak disimpan (keputusan 10)
-  const [hidden, setHidden] = useState(false);
+  // State UI bersama; default tersembunyi. Tidak dipersisten (keputusan 10)
+  const hidden = useUIStore((state) => state.isBalanceHidden);
+  const toggleHidden = useUIStore((state) => state.toggleBalanceVisibility);
+  const parts = balanceParts(balance);
+  const amountColor = balance < 0 && !hidden ? EXPENSE_COLOR : "#ffffff";
 
   return (
     <View
@@ -130,18 +133,21 @@ export function BalanceCard({ balance, income, expense }: BalanceCardProps) {
       </Text>
       <View className="mt-2 flex-row items-center">
         <Text
-          className="font-sans text-[32px] font-bold leading-[38px] tracking-[-0.8px]"
-          style={{
-            color: balance < 0 && !hidden ? EXPENSE_COLOR : "#ffffff",
-            flexShrink: 1,
-          }}
+          className="font-sans text-[25px] font-semibold leading-[30px]"
+          style={{ color: amountColor, marginRight: 10 }}
+        >
+          {hidden ? "Rp" : `${parts.sign}Rp`}
+        </Text>
+        <Text
+          className="font-sans text-[25px] font-bold leading-[30px] tracking-[-0.8px]"
+          style={{ color: amountColor, flexShrink: 1 }}
           numberOfLines={1}
           adjustsFontSizeToFit
         >
-          {hidden ? HIDDEN_AMOUNT : formatBalance(balance)}
+          {hidden ? HIDDEN_DIGITS : parts.digits}
         </Text>
         <Pressable
-          onPress={() => setHidden((value) => !value)}
+          onPress={toggleHidden}
           accessibilityRole="button"
           accessibilityLabel={hidden ? "Tampilkan saldo" : "Sembunyikan saldo"}
           hitSlop={12}

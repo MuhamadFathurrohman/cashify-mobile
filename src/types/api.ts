@@ -219,6 +219,9 @@ export interface Transaction {
     description: string | null;
     source: TransactionSource;
     created_at: string;
+    // Ejaan persis dari backend (`occured_at`, commit 7d3ff29); opsional untuk
+    // kompatibilitas dengan backend lama yang belum mengirim field ini.
+    occured_at?: string;
     // Wajib dikirim kembali pada PATCH sebagai penjaga konflik (optimistic locking)
     updated_at: string;
 }

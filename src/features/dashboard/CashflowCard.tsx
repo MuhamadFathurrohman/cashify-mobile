@@ -1,11 +1,14 @@
+import { formatPlainRupiah, formatSigned } from "@/utils/money";
 import Ionicons from "@react-native-vector-icons/ionicons";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import type { CashflowBucket } from "./cashflow";
 
 interface CashflowCardProps {
   buckets: CashflowBucket[];
   monthLabel: string; // mis. "November 2026"
   today: number; // tanggal hari ini (zona Jakarta); rentang yang memuatnya dicetak tebal
+  selectedIndex: number | null;
+  onSelect: (index: number | null) => void;
 }
 
 const INCOME_COLOR = "#006c50";
@@ -47,19 +50,48 @@ function LegendDot({ color, label }: { color: string; label: string }) {
   );
 }
 
+function DetailRow({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: string;
+  color: string;
+}) {
+  return (
+    <View className="flex-row items-center justify-between">
+      <Text className="font-sans text-[11px] leading-[14px] text-[#43474d]">
+        {label}
+      </Text>
+      <Text
+        className="font-sans text-[11px] font-semibold leading-[14px]"
+        style={{ color }}
+      >
+        {value}
+      </Text>
+    </View>
+  );
+}
+
 // Grafik batang 4 rentang tanggal bulan berjalan (keputusan 4), dibuat dari View
-// tanpa dependensi grafik. Tinggi batang relatif terhadap nilai terbesar di grafik.
+// tanpa dependensi grafik. Warna batang tidak berubah; kolom yang dipilih diberi
+// latar dan label tebal. Detail nominal tampil di panel inline, bukan modal.
 export function CashflowCard({
   buckets,
   monthLabel,
   today,
+  selectedIndex,
+  onSelect,
 }: CashflowCardProps) {
   const max = Math.max(0, ...buckets.flatMap((b) => [b.income, b.expense]));
   const isEmpty = max === 0;
+  const active = selectedIndex === null ? null : buckets[selectedIndex];
+  const shortMonth = monthLabel.split(" ")[0]?.slice(0, 3) ?? "";
 
   return (
     <View
-      className="gap-4 rounded-2xl border border-[rgba(196,198,206,0.3)] bg-white p-[21px]"
+      className="gap-3 rounded-2xl border border-[rgba(196,198,206,0.3)] bg-white p-[21px]"
       style={{
         shadowColor: "#19324d",
         shadowOffset: { width: 0, height: 4 },
@@ -73,7 +105,9 @@ export function CashflowCard({
           <Text className="font-sans text-base font-semibold leading-[22px] tracking-[-0.16px] text-[#121c2a]">
             Arus Kas Bulan Ini
           </Text>
-          <Text className="font-sans text-xs leading-4 text-[#43474d]">{monthLabel}</Text>
+          <Text className="font-sans text-xs leading-4 text-[#43474d]">
+            {monthLabel}
+          </Text>
         </View>
         <View className="flex-row items-center gap-3">
           <LegendDot color={INCOME_COLOR} label="Masuk" />
@@ -93,14 +127,36 @@ export function CashflowCard({
         </View>
       ) : (
         <View
-          className="h-[144px] flex-row items-end px-2 pt-4"
+          className="h-[136px] flex-row items-end px-2 pt-4"
           accessibilityLabel={`Grafik arus kas ${monthLabel}`}
+          // Pemisah jadi milik chart, bukan panel. Padding bawah memberi jarak
+          // antara label batang dan garis; total tinggi tetap 136 + 8 = 144.
+          style={{
+            paddingBottom: 4,
+            borderBottomWidth: 1,
+            borderBottomColor: "#eef2f7",
+          }}
         >
-          {buckets.map((bucket) => {
+          {buckets.map((bucket, index) => {
             const isCurrent =
               today >= bucket.startDay && today <= bucket.endDay;
+            const isSelected = selectedIndex === index;
             return (
-              <View key={bucket.label} className="flex-1 items-center">
+              <Pressable
+                key={bucket.label}
+                onPress={() => onSelect(isSelected ? null : index)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityLabel={`${bucket.label}: masuk ${formatPlainRupiah(bucket.income)}, keluar ${formatPlainRupiah(bucket.expense)}`}
+                android_ripple={{
+                  color: "rgba(0,0,0,0.05)",
+                  borderless: false,
+                }}
+                className="flex-1 items-center rounded-xl pb-1 pt-1"
+                style={{
+                  backgroundColor: isSelected ? "#f1f5f9" : "transparent",
+                }}
+              >
                 <View
                   className="flex-row items-end"
                   style={{ height: BAR_AREA_HEIGHT, gap: 6 }}
@@ -116,18 +172,81 @@ export function CashflowCard({
                 </View>
                 <Text
                   className={
-                    isCurrent
+                    isSelected || isCurrent
                       ? "font-sans pt-2 text-[10px] font-bold leading-[14px] tracking-[0.4px] text-[#001d37]"
                       : "font-sans pt-2 text-[10px] font-semibold leading-[14px] tracking-[0.4px] text-[#74777e]"
                   }
                 >
                   {bucket.label}
                 </Text>
-              </View>
+                {/* Wrapper tetap dirender agar tinggi kolom tidak berubah,
+                    tetapi titik hanya tampil saat batang dipilih */}
+                <View className="mt-[2px] h-[8px] items-center justify-center">
+                  {isSelected ? (
+                    <Ionicons name="ellipse" size={8} color={INCOME_COLOR} />
+                  ) : null}
+                </View>
+              </Pressable>
             );
           })}
         </View>
       )}
+
+      {/* Ruang detail disiapkan dari awal agar kartu tidak meloncat saat batang dipilih */}
+      <View
+        style={{
+          // Tinggi tetap agar kartu tidak bergerak saat teks berganti ke detail.
+          // Pemisah ada di borderBottom chart, jadi panel cukup menengahkan isi.
+          height: 50,
+          justifyContent: "center",
+        }}
+      >
+        {active ? (
+          <View className="flex-row items-center">
+            <Text
+              className="font-sans w-[88px] text-[11px] font-semibold leading-4 text-[#001d37]"
+              numberOfLines={1}
+            >
+              {active.label} {shortMonth}
+            </Text>
+            <View
+              style={{
+                width: 1,
+                height: 35,
+                marginHorizontal: 10,
+                backgroundColor: "#e2e8f0",
+              }}
+            />
+            <View className="flex-1 gap-[3px]">
+              <DetailRow
+                label="Uang masuk"
+                value={formatPlainRupiah(active.income)}
+                color={INCOME_COLOR}
+              />
+              <DetailRow
+                label="Uang keluar"
+                value={formatPlainRupiah(active.expense)}
+                color={EXPENSE_COLOR}
+              />
+              <DetailRow
+                label="Selisih"
+                value={formatSigned(active.income - active.expense)}
+                color={
+                  active.income - active.expense < 0
+                    ? EXPENSE_COLOR
+                    : INCOME_COLOR
+                }
+              />
+            </View>
+          </View>
+        ) : (
+          <Text className="font-sans text-[12px] leading-5 text-[#74777e]">
+            {isEmpty
+              ? "Belum ada detail arus kas bulan ini."
+              : "Setiap batang grafik mewakili periode 7 hari. Ketuk untuk melihat rincian pemasukan dan pengeluaran."}
+          </Text>
+        )}
+      </View>
     </View>
   );
 }

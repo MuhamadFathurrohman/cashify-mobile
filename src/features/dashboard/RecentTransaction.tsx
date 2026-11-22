@@ -1,6 +1,9 @@
 import type { DashboardTransaction } from "@/types/api";
 import { categoryIconName } from "@/utils/categoryIcon";
-import { formatRelativeDate } from "@/utils/jakartaDates";
+import {
+  formatJakartaTime,
+  formatRelativeDate,
+} from "@/utils/jakartaDates";
 import { formatExpense, formatIncome } from "@/utils/money";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { Pressable, Text, View } from "react-native";
@@ -22,6 +25,8 @@ function TransactionRow({ item }: { item: DashboardTransaction }) {
   const color = isIncome ? INCOME_COLOR : EXPENSE_COLOR;
   const description = item.description?.trim();
   const date = formatRelativeDate(item.date);
+  const time = item.occured_at ? formatJakartaTime(item.occured_at) : "";
+  const when = time ? `${date}, ${time}` : date;
 
   return (
     <View
@@ -60,7 +65,7 @@ function TransactionRow({ item }: { item: DashboardTransaction }) {
             className="font-sans text-xs leading-4 text-[#74777e]"
             numberOfLines={1}
           >
-            {description ? `${item.category.name} • ${date}` : date}
+            {description ? `${item.category.name} • ${when}` : when}
           </Text>
         </View>
       </View>
