@@ -1,42 +1,33 @@
 import { SkeletonBlock, SkeletonPulse } from "@/components/ui/Skeleton";
-import { formatExpense, formatIncome } from "@/utils/money";
 import { TYPE_THEME } from "@/utils/categoryIconTheme";
+import { formatExpense, formatIncome } from "@/utils/money";
 import Ionicons from "@react-native-vector-icons/ionicons";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import type { TransactionSummary } from "./useTransactionSummary";
 
 interface TransactionSummaryCardProps {
   summary: TransactionSummary | null;
   isLoading: boolean;
   isError: boolean;
-  onRetry: () => void;
 }
 
 // Total Masuk / Total Keluar untuk seluruh hasil filter (bukan hanya halaman yang dimuat).
+// Kartu sengaja tidak punya tombol Coba Lagi: pemulihan ringkasan mengikuti
+// satu aksi pemulihan layar (banner, pull-to-refresh, atau ErrorState daftar).
 export function TransactionSummaryCard({
   summary,
   isLoading,
   isError,
-  onRetry,
 }: TransactionSummaryCardProps) {
   let content;
   if (isError) {
     // Sengaja tidak menampilkan angka parsial atau nol
     content = (
-      <View className="flex-row items-center justify-between py-1">
-        <Text className="font-sans flex-1 text-xs leading-4 text-[#43474d]">
-          Ringkasan belum bisa dihitung.
+      <View className="py-1">
+        <Text className="font-sans text-xs leading-4 text-[#43474d]">
+          Total Masuk dan Keluar belum bisa dihitung. Periksa koneksi, lalu
+          tarik daftar ke bawah.
         </Text>
-        <Pressable
-          onPress={onRetry}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel="Coba hitung ulang ringkasan"
-        >
-          <Text className="font-sans text-xs font-semibold text-[#006c50]">
-            Coba Lagi
-          </Text>
-        </Pressable>
       </View>
     );
   } else if (isLoading || !summary) {

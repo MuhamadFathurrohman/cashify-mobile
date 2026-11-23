@@ -2,6 +2,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { TransactionHeader } from "@/features/transactions/TransactionHeader";
 import { useTransactionDetail } from "@/features/transactions/detail/useTransactionDetail";
 import { TransactionForm } from "@/features/transactions/form/TransactionForm";
+import { networkOrFallbackMessage } from "@/features/transactions/transactionErrorMessages";
 import { TransactionFormSkeleton } from "@/features/transactions/form/TransactionFormSkeleton";
 import { ApiRequestError } from "@/lib/api/client";
 import Ionicons from "@react-native-vector-icons/ionicons";
@@ -10,12 +11,6 @@ import { Pressable, Text, View } from "react-native";
 
 const FALLBACK_LOAD_ERROR =
   "Data transaksi belum bisa dimuat. Coba lagi sebentar lagi.";
-
-function loadErrorMessage(error: unknown): string {
-  return error instanceof ApiRequestError && error.code === "NETWORK_ERROR"
-    ? error.message
-    : FALLBACK_LOAD_ERROR;
-}
 
 export default function EditTransactionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -67,7 +62,7 @@ export default function EditTransactionScreen() {
       <View className="flex-1 px-5 pt-4">
         <ErrorState
           title="Gagal memuat transaksi"
-          message={loadErrorMessage(detail.error)}
+          message={networkOrFallbackMessage(detail.error, FALLBACK_LOAD_ERROR)}
           onRetry={() => void detail.refetch()}
           retrying={detail.isFetching}
         />

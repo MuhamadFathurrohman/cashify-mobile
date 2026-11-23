@@ -6,6 +6,7 @@ import { TransactionDetailSkeleton } from "@/features/transactions/detail/Transa
 import { TransactionSourceMessage } from "@/features/transactions/detail/TransactionSourceMessage";
 import { useDeleteTransaction } from "@/features/transactions/detail/useDeleteTransaction";
 import { useTransactionDetail } from "@/features/transactions/detail/useTransactionDetail";
+import { networkOrFallbackMessage } from "@/features/transactions/transactionErrorMessages";
 import { ApiRequestError } from "@/lib/api/client";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -24,17 +25,7 @@ import { toast } from "sonner-native";
 const FALLBACK_LOAD_ERROR =
   "Detail transaksi belum bisa dimuat. Coba lagi sebentar lagi.";
 
-function loadErrorMessage(error: unknown): string {
-  return error instanceof ApiRequestError && error.code === "NETWORK_ERROR"
-    ? error.message
-    : FALLBACK_LOAD_ERROR;
-}
-
-function deleteErrorMessage(error: unknown): string {
-  return error instanceof ApiRequestError && error.code === "NETWORK_ERROR"
-    ? error.message
-    : "Transaksi gagal dihapus. Coba lagi.";
-}
+const FALLBACK_DELETE_ERROR = "Transaksi gagal dihapus. Coba lagi.";
 
 export default function TransactionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -67,7 +58,7 @@ export default function TransactionDetailScreen() {
         close();
         return;
       }
-      toast.error(deleteErrorMessage(error));
+      toast.error(networkOrFallbackMessage(error, FALLBACK_DELETE_ERROR));
       return;
     }
     setConfirmVisible(false);
@@ -123,7 +114,7 @@ export default function TransactionDetailScreen() {
       >
         <ErrorState
           title="Gagal memuat transaksi"
-          message={loadErrorMessage(detail.error)}
+          message={networkOrFallbackMessage(detail.error, FALLBACK_LOAD_ERROR)}
           onRetry={() => void detail.refetch()}
           retrying={detail.isFetching}
         />

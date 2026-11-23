@@ -63,9 +63,7 @@ export default function HistoryScreen() {
 
   // Tab bar tetap bisa ditekan saat sheet terbuka, jadi sheet ditutup ketika
   // pengguna berpindah tab agar tidak terbuka lagi saat layar ini kembali
-  useFocusEffect(
-    useCallback(() => () => setSheetVisible(false), []),
-  );
+  useFocusEffect(useCallback(() => () => setSheetVisible(false), []));
 
   // Debounce manual: query dikirim ke hook hanya setelah pengguna berhenti mengetik
   useEffect(() => {
@@ -109,8 +107,11 @@ export default function HistoryScreen() {
   const hasActiveFilters =
     Object.keys(filters).length > 0 || type !== undefined;
   const isFiltered = hasActiveFilters || searchQuery.length > 0;
-  const showRefreshError =
-    isRefetchError && !isFetchNextPageError && !refreshing;
+  // Banner tetap tampil selama retry (status memuat di tombol) agar tidak berkedip
+  const showRefreshError = isRefetchError && !isFetchNextPageError;
+  // Daftar gagal tanpa data: ErrorState menggantikan konten, jadi kartu ringkasan
+  // disembunyikan agar tidak muncul dua pesan dan dua tombol Coba Lagi.
+  const listFailedWithoutData = isError && !data;
 
   const handleEndReached = useCallback(() => {
     // Guard: tanpa halaman berikutnya, saat sedang memuat, atau setelah gagal
@@ -180,25 +181,22 @@ export default function HistoryScreen() {
 
   const listHeader = useMemo(
     () => (
-      <View className="gap-3 pb-4">
-        {showRefreshError ? (
-          <RefreshErrorBanner onRetry={() => void handleRefresh()} />
-        ) : null}
+      <View className="pb-4">
         <TransactionSummaryCard
           summary={summary.summary}
-          isLoading={summary.isLoading}
-          isError={summary.isError}
-          onRetry={summary.retry}
+          // Ikut status daftar agar galat ringkasan tidak muncul lebih dulu
+          // saat skeleton daftar masih berjalan.
+          isLoading={summary.isLoading || isPending}
+          isError={summary.isError && !isPending && !listFailedWithoutData}
         />
       </View>
     ),
     [
-      showRefreshError,
-      handleRefresh,
       summary.summary,
       summary.isLoading,
       summary.isError,
-      summary.retry,
+      isPending,
+      listFailedWithoutData,
     ],
   );
 
@@ -208,7 +206,8 @@ export default function HistoryScreen() {
       return (
         <ErrorState
           message={errorMessage(error)}
-          onRetry={() => void refetch()}
+          // Satu aksi pemulihan untuk seluruh layar: daftar dan ringkasan ikut segar.
+          onRetry={() => void handleRefresh()}
           retrying={list.isRefetching}
         />
       );
@@ -224,7 +223,7 @@ export default function HistoryScreen() {
     isPending,
     isError,
     error,
-    refetch,
+    handleRefresh,
     list.isRefetching,
     isFiltered,
     hasActiveFilters,
@@ -254,12 +253,22 @@ export default function HistoryScreen() {
         onTypeChange={setType}
       />
 
+      {/* Banner di luar FlatList agar tetap terlihat di posisi gulir mana pun */}
+      {showRefreshError ? (
+        <View className="px-5 pt-3">
+          <RefreshErrorBanner
+            onRetry={() => void handleRefresh()}
+            retrying={refreshing}
+          />
+        </View>
+      ) : null}
+
       <FlatList
         data={groups}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         ItemSeparatorComponent={GroupSeparator}
-        ListHeaderComponent={listHeader}
+        ListHeaderComponent={listFailedWithoutData ? undefined : listHeader}
         ListEmptyComponent={emptyContent}
         ListFooterComponent={listFooter}
         contentContainerStyle={{
