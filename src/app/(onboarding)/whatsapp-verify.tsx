@@ -12,6 +12,7 @@ import {
   getRetryAfterSeconds,
 } from "@/features/whatsapp/whatsappErrors";
 import { useKeyboardAwareScreen } from "@/hooks/useKeyboardAwareScreen";
+import { formatCountdown } from "@/utils/duration";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import * as Clipboard from "expo-clipboard";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -51,13 +52,6 @@ function formatBotNumber(digits: string): string {
 
 const BOT_DISPLAY = formatBotNumber(BOT_WA_NUMBER);
 const BOT_COPY = `+62${BOT_WA_NUMBER.replace(/^62/, "")}`;
-
-// Sama seperti formatCountdown di forgotPasswordCooldown: selalu mm:ss
-function formatCountdown(totalSeconds: number): string {
-  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
-  const seconds = String(totalSeconds % 60).padStart(2, "0");
-  return `${minutes}:${seconds}`;
-}
 
 // ─── Komponen OTP Box ─────────────────────────────────────────────────────────
 interface OtpInputProps {

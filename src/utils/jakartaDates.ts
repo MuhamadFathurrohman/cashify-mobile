@@ -12,8 +12,35 @@ const MONTHS_LONG = [
     "Juli", "Agustus", "September", "Oktober", "November", "Desember",
 ] as const;
 
+const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+export interface DateParts {
+    year: number;
+    month: number;
+    day: number;
+}
+
 function toJakarta(now: Date): Date {
     return new Date(now.getTime() + JAKARTA_OFFSET_MS);
+}
+
+// "2026-10-26" -> bagian tanggal; null bila format salah atau tanggal tidak ada
+// di kalender (mis. 2026-02-30)
+export function parseDate(value: string): DateParts | null {
+    const match = DATE_PATTERN.exec(value);
+    if (!match) return null;
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const probe = new Date(Date.UTC(year, month - 1, day));
+    if (
+        probe.getUTCFullYear() !== year ||
+        probe.getUTCMonth() !== month - 1 ||
+        probe.getUTCDate() !== day
+    ) {
+        return null;
+    }
+    return { year, month, day };
 }
 
 // Bulan berjalan format "YYYY-MM" (sama dengan parameter `month` di GET /dashboard)
@@ -64,7 +91,7 @@ export function formatRelativeDate(date: string, now: Date = new Date()): string
     return year === j.getUTCFullYear() ? base : `${base} ${year}`;
 }
 
-// ISO UTC dari backend (`occured_at`) -> "HH.mm" menurut Asia/Jakarta.
+// ISO UTC dari backend (`occured_at`) -> "HH:mm" menurut Asia/Jakarta.
 // Menggeser manual seperti helper tanggal lain agar tidak bergantung zona perangkat.
 // String yang tidak valid dikembalikan kosong supaya pemanggil bisa jatuh ke tanggal saja.
 export function formatJakartaTime(iso: string): string {
@@ -73,5 +100,23 @@ export function formatJakartaTime(iso: string): string {
     const j = toJakarta(parsed);
     const hours = String(j.getUTCHours()).padStart(2, "0");
     const minutes = String(j.getUTCMinutes()).padStart(2, "0");
-    return `${hours}.${minutes}`;
+    return `${hours}:${minutes}`;
+}
+
+// "2026-10-26" -> "26 Oktober 2026"; format tidak valid dikembalikan apa adanya
+export function formatDateLong(value: string): string {
+    const parts = parseDate(value);
+    if (!parts) return value;
+    return `${parts.day} ${formatMonthLabel(value.slice(0, 7))}`;
+}
+
+// ISO UTC dari backend -> "26 Nov 2026 • 14:30" menurut Asia/Jakarta.
+// Dipakai untuk waktu yang bukan tanggal transaksi, mis. `source_message.received_at`.
+export function formatJakartaDateTime(iso: string): string {
+    const parsed = new Date(iso);
+    if (Number.isNaN(parsed.getTime())) return "";
+    const j = toJakarta(parsed);
+    const day = String(j.getUTCDate()).padStart(2, "0");
+    const date = `${day} ${MONTHS_SHORT[j.getUTCMonth()]} ${j.getUTCFullYear()}`;
+    return `${date} • ${formatJakartaTime(iso)}`;
 }

@@ -1,6 +1,6 @@
 import { SkeletonBlock, SkeletonPulse } from "@/components/ui/Skeleton";
 import type { Category, TransactionType } from "@/types/api";
-import { categoryIconName } from "@/utils/categoryIcon";
+import { categoryIconName } from "@/utils/categoryIconTheme";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { Pressable, Text, View } from "react-native";
 import { FieldError } from "./TransactionFormErrors";

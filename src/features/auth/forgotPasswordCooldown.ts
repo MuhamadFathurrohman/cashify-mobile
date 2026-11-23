@@ -49,9 +49,3 @@ export function useCooldownRemaining(email: string): number {
         ? Math.max(0, Math.floor(deadline / 1000) - nowSeconds)
         : 0;
 }
-
-export function formatCountdown(totalSeconds: number): string {
-    const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
-    const seconds = String(totalSeconds % 60).padStart(2, "0");
-    return `${minutes}:${seconds}`;
-}

@@ -1,7 +1,5 @@
-import {
-  formatCountdown,
-  useCooldownRemaining,
-} from "@/features/auth/forgotPasswordCooldown";
+import { useCooldownRemaining } from "@/features/auth/forgotPasswordCooldown";
+import { formatCountdown } from "@/utils/duration";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 

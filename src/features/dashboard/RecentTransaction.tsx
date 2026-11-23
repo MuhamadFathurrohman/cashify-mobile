@@ -1,5 +1,5 @@
 import type { DashboardTransaction } from "@/types/api";
-import { categoryIconName } from "@/utils/categoryIcon";
+import { categoryIconName, TYPE_THEME } from "@/utils/categoryIconTheme";
 import {
   formatJakartaTime,
   formatRelativeDate,

@@ -1,6 +1,5 @@
 // Format nominal sesuai desain: "Rp 24.850.000", "+Rp 12.500.000", "-Rp 4.720.000".
-// Berbeda dari formatRupiah (utils/format.ts) yang tanpa spasi dan tanpa tanda,
-// sehingga formatRupiah tidak diubah.
+// Spasi setelah "Rp" dan tanda +/- sengaja dibedakan dari format input (utils/currency.ts).
 function digits(amount: number): string {
     return Math.abs(Math.round(amount)).toLocaleString("id-ID");
 }
