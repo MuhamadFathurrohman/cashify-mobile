@@ -26,5 +26,8 @@ export function useDashboard(month: string = currentMonth()) {
     return useQuery<DashboardResponse, Error>({
         queryKey: dashboardKeys.month(month),
         queryFn: () => getDashboardApi(month),
+        // Beranda adalah layar utama: satu percobaan ulang cukup agar ErrorState
+        // tidak tertunda lama saat jaringan menggantung (timeout 15 dtk per percobaan).
+        retry: 1,
     });
 }

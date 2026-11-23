@@ -86,8 +86,9 @@ export default function HomeScreen() {
       ? error.message
       : FALLBACK_ERROR;
 
-  // Refresh gagal sementara data lama masih ada: beri tahu tanpa mengosongkan layar
-  const showRefreshError = isError && !!data && !isRefetching;
+  // Refresh gagal sementara data lama masih ada: beri tahu tanpa mengosongkan layar.
+  // Banner tetap tampil selama retry (status memuat di tombol) agar tidak berkedip.
+  const showRefreshError = isError && !!data;
 
   let body;
   if (data) {
@@ -144,6 +145,15 @@ export default function HomeScreen() {
       onTouchEnd={handleTouchEnd}
     >
       <HomeHeader />
+      {/* Banner di luar ScrollView agar tetap terlihat di posisi gulir mana pun */}
+      {showRefreshError ? (
+        <View className="px-5 pt-3">
+          <RefreshErrorBanner
+            onRetry={() => void refetch()}
+            retrying={isRefetching}
+          />
+        </View>
+      ) : null}
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 20,
@@ -169,9 +179,6 @@ export default function HomeScreen() {
             Kelola Keuanganmu, Untuk Mencapai Tujuan.
           </Text>
         </View>
-        {showRefreshError ? (
-          <RefreshErrorBanner onRetry={() => void refetch()} />
-        ) : null}
         {body}
       </ScrollView>
     </View>
