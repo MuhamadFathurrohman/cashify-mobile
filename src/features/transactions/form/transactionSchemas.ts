@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { Transaction } from "@/types/api";
+import { formatInputAmount } from "@/utils/currency";
 import {
     MAX_DESCRIPTION_LENGTH,
     todayDate,
@@ -37,5 +39,19 @@ export function defaultTransactionValues(accountId = ""): TransactionFormValues 
         accountId,
         date: todayDate(),
         description: "",
+    };
+}
+
+// Nilai awal mode ubah: kategori/dompet/tanggal dari transaksi, nominal diformat
+// seperti isi kolom (mis. 25000 -> "25.000"), catatan null menjadi string kosong.
+export function transactionValuesFromTransaction(
+    item: Transaction
+): TransactionFormValues {
+    return {
+        amount: formatInputAmount(String(item.amount)),
+        categoryId: item.category.id,
+        accountId: item.account.id,
+        date: item.date.slice(0, 10),
+        description: item.description ?? "",
     };
 }

@@ -1,6 +1,6 @@
 import { TransactionForm } from "@/features/transactions/form/TransactionForm";
 import { TransactionFormSkeleton } from "@/features/transactions/form/TransactionFormSkeleton";
-import { TransactionHeader } from "@/features/transactions/form/TransactionHeader";
+import { TransactionHeader } from "@/features/transactions/TransactionHeader";
 import {
   pickDefaultAccount,
   useAccounts,
@@ -50,7 +50,11 @@ export default function AddTransactionScreen() {
 
   return (
     <View className="flex-1 bg-[#f8f9ff]">
-      <TransactionHeader onClose={close} />
+      <TransactionHeader
+        title="Tambah Transaksi"
+        subtitle="Catat alur kas harian"
+        onClose={close}
+      />
       {body}
     </View>
   );

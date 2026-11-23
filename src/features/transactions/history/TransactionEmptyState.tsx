@@ -1,6 +1,6 @@
+import { TYPE_THEME } from "@/utils/categoryIconTheme";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { Pressable, Text, View } from "react-native";
-import { INCOME_COLOR } from "./TransactionListItem";
 
 interface TransactionEmptyStateProps {
   // true = ada pencarian/filter/tab aktif, jadi kosong BUKAN bukti akun tanpa transaksi
@@ -18,12 +18,12 @@ export function TransactionEmptyState({
     <View className="items-center rounded-2xl border border-dashed border-[rgba(196,198,206,0.8)] bg-white px-5 py-8">
       <View
         className="h-12 w-12 items-center justify-center rounded-full"
-        style={{ backgroundColor: "rgba(39,174,134,0.12)" }}
+        style={{ backgroundColor: TYPE_THEME.income.bubble }}
       >
         <Ionicons
           name={filtered ? "search-outline" : "receipt-outline"}
           size={22}
-          color={INCOME_COLOR}
+          color={TYPE_THEME.income.text}
         />
       </View>
       <Text className="font-sans mt-3 text-base font-semibold text-[#121c2a]">

@@ -14,6 +14,12 @@ export const transactionKeys = {
     // otomatis me-reset infinite scroll.
     list: (params: TransactionListParams) =>
         ["transactions", "list", params] as const,
+
+    // Prefix untuk semua query detail transaksi (GET /transactions/{id}).
+    // Berada di bawah `all` supaya invalidasi transaksi ikut menyegarkan detail.
+    details: () => ["transactions", "detail"] as const,
+
+    detail: (id: string) => ["transactions", "detail", id] as const,
 };
 
 export const categoryKeys = {

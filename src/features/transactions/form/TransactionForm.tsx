@@ -5,11 +5,12 @@ import {
   type SegmentOption,
 } from "@/components/ui/SegmentedControl";
 import { useKeyboardAwareScreen } from "@/hooks/useKeyboardAwareScreen";
-import type { Account, TransactionType } from "@/types/api";
+import type { Account, TransactionDetail, TransactionType } from "@/types/api";
 import { formatInputAmount } from "@/utils/currency";
+import { formatDateLong } from "@/utils/jakartaDates";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Ionicons from "@react-native-vector-icons/ionicons";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -23,8 +24,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
 import {
   buildCreateRequest,
+  buildUpdateRequest,
   earliestAllowedDate,
-  formatDateLong,
   MAX_DESCRIPTION_LENGTH,
   todayDate,
 } from "../transactionRules";
@@ -40,14 +41,21 @@ import {
 import {
   defaultTransactionValues,
   transactionFormSchema,
+  transactionValuesFromTransaction,
   type TransactionFormValues,
 } from "./transactionSchemas";
 import { useCreateTransaction } from "./useCreateTransaction";
+import { useUpdateTransaction } from "../detail/useUpdateTransaction";
 
 interface TransactionFormProps {
   // Dompet bawaan. Pemilihan dompet belum ada di UI (hanya "Tunai"; dompet tambahan: Phase 2).
-  account: Account;
+  // Mode ubah mengirim transaksi.account sehingga label dompet tetap benar.
+  account: Pick<Account, "id" | "name">;
   onDone: () => void;
+  // Diisi pada mode ubah: nilai awal, jenis, dan updated_at (penjaga konflik PATCH).
+  initial?: TransactionDetail;
+  // Dipanggil saat server membalas 409 CONFLICT (data berubah sejak dibaca).
+  onConflict?: () => void;
 }
 
 // Nilai dari Figma 69:2506 (pengeluaran) dan 76:3773 (pemasukan). Kelas ditulis utuh per
@@ -112,9 +120,22 @@ function dateLabel(value: string): string {
   return value === todayDate() ? `Hari ini, ${long}` : long;
 }
 
-export function TransactionForm({ account, onDone }: TransactionFormProps) {
+export function TransactionForm({
+  account,
+  onDone,
+  initial,
+  onConflict,
+}: TransactionFormProps) {
   const insets = useSafeAreaInsets();
-  const [type, setType] = useState<TransactionType>("expense");
+  const isEdit = Boolean(initial);
+  // Nilai awal hanya dihitung ulang bila transaksi sumbernya berubah (mis. setelah refetch)
+  const initialValues = useMemo(
+    () => (initial ? transactionValuesFromTransaction(initial) : null),
+    [initial],
+  );
+  const [type, setType] = useState<TransactionType>(
+    initial ? initial.type : "expense",
+  );
   const [pickerOpen, setPickerOpen] = useState(false);
   // Banner ringkasan hanya muncul setelah pengguna mencoba menyimpan
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -132,6 +153,11 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
   const ui = TYPE_UI[type];
   const categories = useCategories(type);
   const createTransaction = useCreateTransaction();
+  const updateTransaction = useUpdateTransaction();
+  const pending = isEdit
+    ? updateTransaction.isPending
+    : createTransaction.isPending;
+  const saveLabel = isEdit ? "Simpan Perubahan" : ui.saveLabel;
 
   const {
     control,
@@ -140,11 +166,15 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
     setError,
     setFocus,
     clearErrors,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionFormSchema),
-    defaultValues: defaultTransactionValues(account.id),
+    defaultValues: initialValues ?? defaultTransactionValues(account.id),
   });
+
+  // Mode ubah menyimpan tombol selama tidak ada perubahan sama sekali
+  const hasChanges =
+    !initialValues || isDirty || (initial ? type !== initial.type : false);
 
   // Fokus ke input teks atau gulir ke kartu non-input yang pertama kali error
   const focusOrScrollToError = useCallback(() => {
@@ -186,20 +216,52 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
 
   const onValid = async (values: TransactionFormValues) => {
     if (submittingRef.current) return;
-    submittingRef.current = true;
-    try {
-      await createTransaction.mutateAsync(
-        buildCreateRequest({ type, ...values }),
-      );
-    } catch (error) {
-      submittingRef.current = false;
+    const input = { type, ...values };
+
+    const handleError = (error: unknown) => {
       const info = resolveTransactionError(error);
+      if (info.conflict) onConflict?.();
       // Dompet tidak punya kolom di UI, jadi galatnya ditampilkan sebagai toast
       if (info.field && info.field !== "accountId") {
         setError(info.field, { type: "server", message: info.message });
       } else {
         toast.error(info.message);
       }
+    };
+
+    // Mode ubah: hanya field yang berubah yang dikirim, plus updated_at
+    if (initial && initialValues) {
+      const body = buildUpdateRequest(
+        { ...input, updatedAt: initial.updated_at },
+        { type: initial.type, ...initialValues },
+      );
+      if (!body) {
+        // PATCH tanpa perubahan ditolak server; tidak ada yang perlu dikirim
+        toast.info("Tidak ada perubahan untuk disimpan");
+        onDone();
+        return;
+      }
+
+      submittingRef.current = true;
+      try {
+        await updateTransaction.mutateAsync({ id: initial.id, body });
+      } catch (error) {
+        submittingRef.current = false;
+        handleError(error);
+        return;
+      }
+      setSubmitAttempted(false);
+      toast.success("Transaksi diperbarui");
+      onDone();
+      return;
+    }
+
+    submittingRef.current = true;
+    try {
+      await createTransaction.mutateAsync(buildCreateRequest(input));
+    } catch (error) {
+      submittingRef.current = false;
+      handleError(error);
       return;
     }
     setSubmitAttempted(false);
@@ -232,22 +294,22 @@ export function TransactionForm({ account, onDone }: TransactionFormProps) {
           {/* Pressable hanya penangkap sentuhan; warna ada di View di dalamnya */}
           <Pressable
             onPress={() => handleSubmit(onValid, handleInvalid)()}
-            disabled={createTransaction.isPending}
+            disabled={pending || !hasChanges}
             accessibilityRole="button"
-            accessibilityLabel={ui.saveLabel}
-            accessibilityState={{ disabled: createTransaction.isPending }}
+            accessibilityLabel={saveLabel}
+            accessibilityState={{ disabled: pending || !hasChanges }}
             // Opacity ada di Pressable (tanpa radius). View bersudut di dalamnya
             // dibiarkan statis: kelasnya tidak boleh berubah (lihat SegmentedControl).
             className={
-              createTransaction.isPending ? "opacity-80" : "active:opacity-90"
+              pending || !hasChanges ? "opacity-80" : "active:opacity-90"
             }
           >
             <View className="h-[54px] flex-row items-center justify-center rounded-2xl bg-[#006c50] shadow-lg shadow-[#006c50]/20">
-              {createTransaction.isPending ? (
+              {pending ? (
                 <ActivityIndicator color="#ffffff" />
               ) : (
                 <Text className="font-sans text-base font-semibold leading-[22px] text-white">
-                  {ui.saveLabel}
+                  {saveLabel}
                 </Text>
               )}
             </View>

@@ -1,8 +1,7 @@
 import type { Transaction } from "@/types/api";
-import { formatRelativeDate } from "@/utils/jakartaDates";
+import { formatDateLong, formatRelativeDate } from "@/utils/jakartaDates";
 import { memo } from "react";
 import { Text, View } from "react-native";
-import { formatDateLong } from "../transactionRules";
 import { TransactionListItem } from "./TransactionListItem";
 
 export interface DateGroup {
@@ -44,8 +43,10 @@ function groupLabel(date: string): string {
 // Satu kelompok tanggal: label di atas, item dalam satu kartu dengan pemisah antar item.
 export const TransactionDateGroup = memo(function TransactionDateGroup({
   group,
+  onPressItem,
 }: {
   group: DateGroup;
+  onPressItem: (id: string) => void;
 }) {
   return (
     <View className="gap-[10px]">
@@ -63,7 +64,11 @@ export const TransactionDateGroup = memo(function TransactionDateGroup({
         }}
       >
         {group.items.map((item) => (
-          <TransactionListItem key={item.id} item={item} />
+          <TransactionListItem
+            key={item.id}
+            item={item}
+            onPress={() => onPressItem(item.id)}
+          />
         ))}
       </View>
     </View>

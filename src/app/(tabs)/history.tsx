@@ -28,7 +28,7 @@ import type {
   TransactionType,
 } from "@/types/api";
 import { type InfiniteData, useQueryClient } from "@tanstack/react-query";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Keyboard, RefreshControl, View } from "react-native";
 
@@ -51,6 +51,7 @@ function GroupSeparator() {
 
 export default function HistoryScreen() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const tabBarSpace = useTabBarClearance();
 
   const [filters, setFilters] = useState<ActiveFilters>({});
@@ -163,9 +164,18 @@ export default function HistoryScreen() {
 
   // renderItem/header/footer/empty dibuat sekali agar FlatList tidak menerima
   // elemen baru tiap render (TH-10 Tahap 2).
+  const handleOpenDetail = useCallback(
+    (id: string) => {
+      router.push({ pathname: "/transaction/[id]", params: { id } });
+    },
+    [router],
+  );
+
   const renderItem = useCallback(
-    ({ item }: { item: DateGroup }) => <TransactionDateGroup group={item} />,
-    [],
+    ({ item }: { item: DateGroup }) => (
+      <TransactionDateGroup group={item} onPressItem={handleOpenDetail} />
+    ),
+    [handleOpenDetail],
   );
 
   const listHeader = useMemo(

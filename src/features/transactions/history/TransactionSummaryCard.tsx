@@ -1,8 +1,8 @@
 import { SkeletonBlock, SkeletonPulse } from "@/components/ui/Skeleton";
 import { formatExpense, formatIncome } from "@/utils/money";
+import { TYPE_THEME } from "@/utils/categoryIconTheme";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { Pressable, Text, View } from "react-native";
-import { EXPENSE_COLOR, INCOME_COLOR } from "./TransactionListItem";
 import type { TransactionSummary } from "./useTransactionSummary";
 
 interface TransactionSummaryCardProps {
@@ -59,14 +59,18 @@ export function TransactionSummaryCard({
       <View className="flex-row">
         <View className="flex-1">
           <View className="flex-row items-center">
-            <Ionicons name="arrow-down" size={12} color={INCOME_COLOR} />
+            <Ionicons
+              name="arrow-down"
+              size={12}
+              color={TYPE_THEME.income.text}
+            />
             <Text className="font-sans ml-1 text-[10px] font-semibold leading-[14px] tracking-[0.4px] text-[#43474d]">
               Total Masuk
             </Text>
           </View>
           <Text
             className="font-sans mt-1 text-base font-semibold leading-[22px] tracking-[-0.16px]"
-            style={{ color: INCOME_COLOR }}
+            style={{ color: TYPE_THEME.income.text }}
             numberOfLines={1}
             adjustsFontSizeToFit
           >
@@ -76,14 +80,18 @@ export function TransactionSummaryCard({
         <View className="mx-4 w-px bg-[rgba(222,233,252,0.9)]" />
         <View className="flex-1">
           <View className="flex-row items-center">
-            <Ionicons name="arrow-up" size={12} color={EXPENSE_COLOR} />
+            <Ionicons
+              name="arrow-up"
+              size={12}
+              color={TYPE_THEME.expense.text}
+            />
             <Text className="font-sans ml-1 text-[10px] font-semibold leading-[14px] tracking-[0.4px] text-[#43474d]">
               Total Keluar
             </Text>
           </View>
           <Text
             className="font-sans mt-1 text-base font-semibold leading-[22px] tracking-[-0.16px]"
-            style={{ color: EXPENSE_COLOR }}
+            style={{ color: TYPE_THEME.expense.text }}
             numberOfLines={1}
             adjustsFontSizeToFit
           >

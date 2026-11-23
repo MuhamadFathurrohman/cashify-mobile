@@ -73,6 +73,12 @@ export default function HomeScreen() {
 
   const goToAdd = () => router.push({ pathname: "/transaction/add" });
   const goToHistory = () => router.navigate("/(tabs)/history");
+  const goToDetail = useCallback(
+    (id: string) => {
+      router.push({ pathname: "/transaction/[id]", params: { id } });
+    },
+    [router],
+  );
 
   // Pesan jaringan dari apiClient sudah berbahasa Indonesia; galat lain dibuat umum
   const errorMessage =
@@ -109,6 +115,7 @@ export default function HomeScreen() {
           items={data.recent_transactions}
           onSeeAll={goToHistory}
           onAdd={goToAdd}
+          onPressItem={goToDetail}
         />
       </>
     );

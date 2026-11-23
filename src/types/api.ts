@@ -245,6 +245,20 @@ export interface CreateTransactionRequest {
     description?: string | null;
 }
 
+// PATCH /transactions/{id} (📄 OpenAPI + source cashify-be transactions.schema.ts).
+// `updated_at` wajib (optimistic locking, dibandingkan sampai milidetik) dan minimal satu
+// field lain harus dikirim. Field yang tidak dikirim tidak diubah server; `description: null`
+// mengosongkan deskripsi. type dan category_id divalidasi berpasangan oleh backend.
+export interface UpdateTransactionRequest {
+    updated_at: string;
+    type?: TransactionType;
+    amount?: number;
+    category_id?: string;
+    account_id?: string;
+    date?: string;
+    description?: string | null;
+}
+
 // GET /categories?type= dan GET /accounts membungkus daftar dalam `data` (tanpa paginasi)
 export interface CategoryListResponse {
     data: Category[];

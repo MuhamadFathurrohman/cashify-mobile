@@ -12,87 +12,89 @@ interface RecentTransactionsProps {
   items: DashboardTransaction[];
   onSeeAll: () => void;
   onAdd: () => void;
+  onPressItem: (id: string) => void;
 }
 
-const INCOME_COLOR = "#006c50";
-const EXPENSE_COLOR = "#ed7658";
-
-// 📄 Belum diuji dengan data nyata: transaksi belum bisa dibuat dari app, dan bentuk
-// item `recent_transactions` belum terverifikasi (lihat DashboardTransaction di api.ts).
-// Baris belum bisa diketuk: layar detail belum didesain.
-function TransactionRow({ item }: { item: DashboardTransaction }) {
+// 📄 Belum diuji dengan data nyata: bentuk item `recent_transactions` sudah memuat
+// `occured_at` sejak commit backend 7d3ff29. Baris bisa diketuk untuk membuka detail.
+function TransactionRow({
+  item,
+  onPress,
+}: {
+  item: DashboardTransaction;
+  onPress: () => void;
+}) {
   const isIncome = item.type === "income";
-  const color = isIncome ? INCOME_COLOR : EXPENSE_COLOR;
+  const theme = TYPE_THEME[item.type];
   const description = item.description?.trim();
   const date = formatRelativeDate(item.date);
   const time = item.occured_at ? formatJakartaTime(item.occured_at) : "";
   const when = time ? `${date}, ${time}` : date;
 
   return (
-    <View
-      className="flex-row items-center justify-between rounded-xl border border-[rgba(196,198,206,0.3)] bg-white p-[15px]"
-      style={{
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 1,
-        elevation: 1,
-      }}
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${description || item.category.name}, ${isIncome ? "pemasukan" : "pengeluaran"} ${isIncome ? formatIncome(item.amount) : formatExpense(item.amount)}${time ? `, pukul ${time}` : ""}`}
+      android_ripple={{ color: "rgba(0,0,0,0.04)", borderless: false }}
     >
-      <View className="flex-1 flex-row items-center">
-        <View
-          className="h-11 w-11 items-center justify-center rounded-2xl"
-          style={{
-            backgroundColor: isIncome
-              ? "rgba(127,249,204,0.2)"
-              : "rgba(237,118,88,0.1)",
-          }}
-        >
-          <Ionicons
-            name={categoryIconName(item.category.icon, item.type)}
-            size={20}
-            color={color}
-          />
+      <View
+        className="flex-row items-center justify-between rounded-xl border border-[rgba(196,198,206,0.3)] bg-white p-[15px]"
+        style={{
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 1,
+          elevation: 1,
+        }}
+      >
+        <View className="flex-1 flex-row items-center">
+          <View
+            className="h-11 w-11 items-center justify-center rounded-2xl"
+            style={{ backgroundColor: theme.bubble }}
+          >
+            <Ionicons
+              name={categoryIconName(item.category.icon, item.type)}
+              size={20}
+              color={theme.text}
+            />
+          </View>
+          <View className="ml-3 flex-1">
+            <Text
+              className="font-sans text-base font-semibold leading-5 tracking-[-0.16px] text-[#121c2a]"
+              numberOfLines={1}
+            >
+              {description || item.category.name}
+            </Text>
+            <Text
+              className="font-sans text-xs leading-4 text-[#74777e]"
+              numberOfLines={1}
+            >
+              {description ? `${item.category.name} • ${when}` : when}
+            </Text>
+          </View>
         </View>
-        <View className="ml-3 flex-1">
+        <View className="items-end pl-3">
           <Text
-            className="font-sans text-base font-semibold leading-5 tracking-[-0.16px] text-[#121c2a]"
-            numberOfLines={1}
+            className="font-sans text-base font-semibold leading-[22px] tracking-[-0.16px]"
+            style={{ color: theme.text }}
           >
-            {description || item.category.name}
+            {isIncome ? formatIncome(item.amount) : formatExpense(item.amount)}
           </Text>
-          <Text
-            className="font-sans text-xs leading-4 text-[#74777e]"
-            numberOfLines={1}
+          <View
+            className="mt-[3px] rounded-full px-2 py-[2px]"
+            style={{ backgroundColor: theme.badge }}
           >
-            {description ? `${item.category.name} • ${when}` : when}
-          </Text>
+            <Text
+              className="font-sans text-[10px] font-semibold leading-[14px] tracking-[0.4px]"
+              style={{ color: theme.text }}
+            >
+              {isIncome ? "Masuk" : "Keluar"}
+            </Text>
+          </View>
         </View>
       </View>
-      <View className="items-end pl-3">
-        <Text
-          className="font-sans text-base font-semibold leading-[22px] tracking-[-0.16px]"
-          style={{ color }}
-        >
-          {isIncome ? formatIncome(item.amount) : formatExpense(item.amount)}
-        </Text>
-        <View
-          className="mt-[3px] rounded-full px-2 py-[2px]"
-          style={{
-            backgroundColor: isIncome
-              ? "rgba(0,108,80,0.1)"
-              : "rgba(237,118,88,0.1)",
-          }}
-        >
-          <Text
-            className="font-sans text-[10px] font-semibold leading-[14px] tracking-[0.4px]"
-            style={{ color }}
-          >
-            {isIncome ? "Masuk" : "Keluar"}
-          </Text>
-        </View>
-      </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -102,9 +104,13 @@ function EmptyTransactions({ onAdd }: { onAdd: () => void }) {
     <View className="items-center rounded-2xl border border-dashed border-[rgba(196,198,206,0.8)] bg-white px-5 py-8">
       <View
         className="h-12 w-12 items-center justify-center rounded-full"
-        style={{ backgroundColor: "rgba(0,108,80,0.1)" }}
+        style={{ backgroundColor: TYPE_THEME.income.badge }}
       >
-        <Ionicons name="receipt-outline" size={22} color={INCOME_COLOR} />
+        <Ionicons
+          name="receipt-outline"
+          size={22}
+          color={TYPE_THEME.income.text}
+        />
       </View>
       <Text className="font-sans mt-3 text-base font-semibold text-[#121c2a]">
         Belum ada transaksi
@@ -120,7 +126,7 @@ function EmptyTransactions({ onAdd }: { onAdd: () => void }) {
         accessibilityLabel="Catat transaksi"
         android_ripple={{ color: "rgba(255,255,255,0.2)", borderless: false }}
         className="mt-4 rounded-full px-5 py-[10px]"
-        style={{ backgroundColor: INCOME_COLOR }}
+        style={{ backgroundColor: TYPE_THEME.income.text }}
       >
         <Text className="font-sans text-sm font-semibold text-white">
           Catat Transaksi
@@ -134,6 +140,7 @@ export function RecentTransactions({
   items,
   onSeeAll,
   onAdd,
+  onPressItem,
 }: RecentTransactionsProps) {
   const isEmpty = items.length === 0;
 
@@ -164,7 +171,11 @@ export function RecentTransactions({
       ) : (
         <View className="gap-[10px]">
           {items.map((item) => (
-            <TransactionRow key={item.id} item={item} />
+            <TransactionRow
+              key={item.id}
+              item={item}
+              onPress={() => onPressItem(item.id)}
+            />
           ))}
         </View>
       )}

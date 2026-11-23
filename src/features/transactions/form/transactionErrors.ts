@@ -11,6 +11,8 @@ export interface TransactionErrorInfo {
     message: string;
     // Diisi bila galat bisa dikaitkan ke satu kolom; kosong = tampilkan sebagai toast
     field?: TransactionFormField;
+    // 409: data berubah sejak dibaca klien (optimistic locking PATCH)
+    conflict?: boolean;
 }
 
 // Nama field pada details[] mengikuti nama kunci body (❓ belum diuji dengan respons nyata)
@@ -47,6 +49,9 @@ export function resolveTransactionError(error: unknown): TransactionErrorInfo {
             return {
                 message: "Kategori atau dompet tidak ditemukan. Muat ulang lalu coba lagi.",
             };
+        case "CONFLICT":
+            // Pesan backend sudah menjelaskan bahwa data berubah dan perlu dimuat ulang
+            return { message: error.message, conflict: true };
         case "RATE_LIMITED": {
             const seconds = error.details?.find(
                 (item) => item.retry_after_seconds !== undefined

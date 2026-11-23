@@ -11,13 +11,17 @@ export default function TransactionLayout() {
         headerShadowVisible: false,
       }}
     >
-      <Stack.Screen name="[id]" options={{ title: "Detail Transaksi" }} />
-      {/* Header kustom (TransactionHeader) sesuai Figma 69:2506, jadi header bawaan dimatikan */}
+      {/* Header kustom (TransactionHeader) dipakai ketiga layar transaksi, jadi header
+          bawaan Stack dimatikan agar tidak ada judul ganda */}
+      <Stack.Screen name="[id]" options={{ headerShown: false }} />
       <Stack.Screen
         name="add"
         options={{ headerShown: false, animation: "slide_from_bottom" }}
       />
-      <Stack.Screen name="edit/[id]" options={{ title: "Ubah Transaksi" }} />
+      <Stack.Screen
+        name="edit/[id]"
+        options={{ headerShown: false, animation: "slide_from_bottom" }}
+      />
     </Stack>
   );
 }

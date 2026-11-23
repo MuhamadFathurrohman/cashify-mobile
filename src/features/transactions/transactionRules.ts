@@ -1,9 +1,13 @@
-import type { CreateTransactionRequest, TransactionType } from "@/types/api";
+import type {
+    CreateTransactionRequest,
+    TransactionType,
+    UpdateTransactionRequest,
+} from "@/types/api";
 import { parseRawAmount } from "@/utils/currency";
 import {
     currentDay,
     currentMonth,
-    formatMonthLabel,
+    parseDate,
 } from "@/utils/jakartaDates";
 
 // Batas dari OpenAPI backend (📄 belum diuji dengan permintaan nyata ❓)
@@ -25,34 +29,8 @@ export function validateAmount(formatted: string): string | null {
 // ❓ Zona yang dipakai backend untuk aturan "tidak boleh di masa depan" belum
 // terdokumentasi; bila ternyata UTC, tanggal hari ini WIB sebelum pukul 07.00 bisa ditolak.
 
-const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
-
-interface DateParts {
-    year: number;
-    month: number;
-    day: number;
-}
-
 function pad(value: number, length = 2): string {
     return String(value).padStart(length, "0");
-}
-
-function parseDate(value: string): DateParts | null {
-    const match = DATE_PATTERN.exec(value);
-    if (!match) return null;
-    const year = Number(match[1]);
-    const month = Number(match[2]);
-    const day = Number(match[3]);
-    // Tolak tanggal yang tidak ada di kalender (mis. 2026-02-30)
-    const probe = new Date(Date.UTC(year, month - 1, day));
-    if (
-        probe.getUTCFullYear() !== year ||
-        probe.getUTCMonth() !== month - 1 ||
-        probe.getUTCDate() !== day
-    ) {
-        return null;
-    }
-    return { year, month, day };
 }
 
 // Hari ini menurut Jakarta, format "YYYY-MM-DD"
@@ -84,13 +62,6 @@ export function validateTransactionDate(
     return null;
 }
 
-// "2026-10-26" -> "26 Oktober 2026"; format tidak valid dikembalikan apa adanya
-export function formatDateLong(value: string): string {
-    const parts = parseDate(value);
-    if (!parts) return value;
-    return `${parts.day} ${formatMonthLabel(value.slice(0, 7))}`;
-}
-
 // ── Permintaan ──────────────────────────────────────────────────────────
 
 export interface TransactionFormInput {
@@ -115,4 +86,38 @@ export function buildCreateRequest(
         date: input.date,
         ...(description ? { description } : {}),
     };
+}
+
+// ── PATCH ───────────────────────────────────────────────────────────────
+// Hanya field yang berubah yang dikirim. Backend membangun patch dengan spread
+// bersyarat (`input.x !== undefined`), jadi field yang tidak dikirim tidak disentuh.
+// `updated_at` wajib untuk optimistic locking dan harus dikirim apa adanya (dibandingkan
+// sampai milidetik). Field yang berubah tetapi tidak dikirim = tidak diubah server.
+export function buildUpdateRequest(
+    current: TransactionFormInput & { updatedAt: string },
+    initial: TransactionFormInput
+): UpdateTransactionRequest | null {
+    const patch: UpdateTransactionRequest = { updated_at: current.updatedAt };
+
+    if (current.type !== initial.type) patch.type = current.type;
+
+    const amount = parseRawAmount(current.amount);
+    if (amount !== parseRawAmount(initial.amount)) patch.amount = amount;
+
+    if (current.categoryId !== initial.categoryId) {
+        patch.category_id = current.categoryId;
+    }
+    if (current.accountId !== initial.accountId) {
+        patch.account_id = current.accountId;
+    }
+    if (current.date !== initial.date) patch.date = current.date;
+
+    // description null mengosongkan catatan; string kosong berarti "kosongkan juga"
+    const description = current.description.trim();
+    if (description !== initial.description.trim()) {
+        patch.description = description ? description : null;
+    }
+
+    // Hanya updated_at = tidak ada perubahan; PATCH akan ditolak server
+    return Object.keys(patch).length > 1 ? patch : null;
 }

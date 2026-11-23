@@ -6,15 +6,23 @@ import type { TransactionType } from "@/types/api";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { EXPENSE_COLOR } from "./TransactionListItem";
+import { TYPE_ACTIVE_CLASS, TYPE_THEME } from "@/utils/categoryIconTheme";
 
 type TabValue = "all" | TransactionType;
 
 // Kelas activeClassName statis per opsi (aturan SegmentedControl: jangan dirakit dinamis)
 const TAB_OPTIONS: readonly SegmentOption<TabValue>[] = [
   { value: "all", label: "Semua" },
-  { value: "expense", label: "Pengeluaran", activeClassName: "bg-[#f0785a]" },
-  { value: "income", label: "Pemasukan", activeClassName: "bg-[#27ae86]" },
+  {
+    value: "expense",
+    label: "Pengeluaran",
+    activeClassName: TYPE_ACTIVE_CLASS.expense,
+  },
+  {
+    value: "income",
+    label: "Pemasukan",
+    activeClassName: TYPE_ACTIVE_CLASS.income,
+  },
 ];
 
 interface HistoryHeaderProps {
@@ -92,7 +100,7 @@ export function HistoryHeader({
           {hasActiveFilters ? (
             <View
               className="absolute right-[10px] top-[10px] h-2 w-2 rounded-full"
-              style={{ backgroundColor: EXPENSE_COLOR }}
+              style={{ backgroundColor: TYPE_THEME.expense.text }}
             />
           ) : null}
         </Pressable>

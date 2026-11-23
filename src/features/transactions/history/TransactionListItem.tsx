@@ -1,25 +1,14 @@
 import type { Transaction } from "@/types/api";
-import { categoryIconName } from "@/utils/categoryIcon";
+import { categoryIconName, TYPE_THEME } from "@/utils/categoryIconTheme";
 import { formatJakartaTime } from "@/utils/jakartaDates";
 import { formatExpense, formatIncome } from "@/utils/money";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { memo } from "react";
 import { Pressable, Text, View } from "react-native";
-
-export const INCOME_COLOR = "#27ae86";
-export const EXPENSE_COLOR = "#f0785a";
-
-const SOURCE_LABELS: Record<Transaction["source"], string> = {
-  manual: "Manual",
-  whatsapp: "WhatsApp",
-  recurring: "Recurring",
-  import: "Import",
-};
+import { SOURCE_LABELS } from "../sourceLabels";
 
 interface TransactionListItemProps {
   item: Transaction;
-  // Opsional: dipersiapkan untuk navigasi detail di iterasi berikutnya.
-  // Belum ada navigasi yang terhubung saat ini.
   onPress?: () => void;
 }
 
@@ -28,8 +17,7 @@ export const TransactionListItem = memo(function TransactionListItem({
   onPress,
 }: TransactionListItemProps) {
   const isIncome = item.type === "income";
-  const color = isIncome ? INCOME_COLOR : EXPENSE_COLOR;
-  const bubbleBg = isIncome ? "rgba(39,174,134,0.12)" : "rgba(240,120,90,0.12)";
+  const theme = TYPE_THEME[item.type];
   const description = item.description?.trim();
   const sourceLabel = SOURCE_LABELS[item.source];
   const time = item.occured_at ? formatJakartaTime(item.occured_at) : "";
@@ -47,12 +35,12 @@ export const TransactionListItem = memo(function TransactionListItem({
       <View className="flex-1 flex-row items-center">
         <View
           className="h-11 w-11 items-center justify-center rounded-2xl"
-          style={{ backgroundColor: bubbleBg }}
+          style={{ backgroundColor: theme.bubble }}
         >
           <Ionicons
             name={categoryIconName(item.category.icon, item.type)}
             size={20}
-            color={color}
+            color={theme.text}
           />
         </View>
         <View className="ml-3 flex-1">
@@ -75,7 +63,7 @@ export const TransactionListItem = memo(function TransactionListItem({
       <View className="items-end pl-3">
         <Text
           className="font-sans text-base font-semibold leading-[22px] tracking-[-0.16px]"
-          style={{ color }}
+          style={{ color: theme.text }}
         >
           {isIncome ? formatIncome(item.amount) : formatExpense(item.amount)}
         </Text>
