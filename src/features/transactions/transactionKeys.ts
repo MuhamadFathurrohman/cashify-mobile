@@ -24,7 +24,10 @@ export const transactionKeys = {
 
 export const categoryKeys = {
     all: ["categories"] as const,
-    byType: (type: TransactionType) => ["categories", type] as const,
+    // userId disertakan agar cache tidak terpakai silang antar pengguna di perangkat
+    // yang sama (logout lalu masuk dengan akun lain).
+    byType: (type: TransactionType, userId: string) =>
+        ["categories", userId, type] as const,
 };
 
 export const accountKeys = {

@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/features/auth/authStore";
 import { apiClient } from "@/lib/api/client";
 import type { Category, CategoryListResponse, TransactionType } from "@/types/api";
 import { useQuery } from "@tanstack/react-query";
@@ -17,9 +18,13 @@ async function fetchCategories(type: TransactionType): Promise<Category[]> {
 }
 
 export function useCategories(type: TransactionType) {
+    // Kunci query memuat userId supaya cache kategori tidak bocor antar akun
+    const userId = useAuthStore((state) => state.user?.id);
+
     return useQuery({
-        queryKey: categoryKeys.byType(type),
+        queryKey: categoryKeys.byType(type, userId ?? ""),
         queryFn: () => fetchCategories(type),
+        enabled: Boolean(userId),
         staleTime: CATEGORIES_STALE_MS,
     });
 }
