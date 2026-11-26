@@ -30,10 +30,13 @@ interface BudgetCategoryAddPanelProps {
   total: number;
   summaryRows: SummaryRow[];
   amountInputRef?: Ref<ComponentRef<typeof TextInput>>;
+  amountCardRef?: Ref<ViewInstance>;
   categoryRef?: Ref<ViewInstance>;
   thresholdRef?: Ref<ViewInstance>;
   onSelectCategory: (id: string) => void;
   onAmountChange: (text: string) => void;
+  onAmountFocus?: () => void;
+  onAmountBlur?: () => void;
   onAddAmountPreset: (amount: number) => void;
   onThresholdChange: (value: number) => void;
   // create: kembali ke langkah total; add: buka tampilan ubah total.
@@ -56,10 +59,13 @@ export function BudgetCategoryAddPanel({
   total,
   summaryRows,
   amountInputRef,
+  amountCardRef,
   categoryRef,
   thresholdRef,
   onSelectCategory,
   onAmountChange,
+  onAmountFocus,
+  onAmountBlur,
   onAddAmountPreset,
   onThresholdChange,
   onEditTotal,
@@ -90,7 +96,10 @@ export function BudgetCategoryAddPanel({
         amountError={amountError}
         amountHelper="Nominal yang disisihkan untuk kategori ini."
         amountInputRef={amountInputRef}
+        amountCardRef={amountCardRef}
         onAmountChange={onAmountChange}
+        onAmountFocus={onAmountFocus}
+        onAmountBlur={onAmountBlur}
         onAddAmountPreset={onAddAmountPreset}
         threshold={threshold}
         thresholdError={thresholdError}

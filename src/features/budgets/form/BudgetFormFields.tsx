@@ -96,6 +96,10 @@ interface AmountInputProps {
   helper: string;
   accessibilityLabel: string;
   inputRef?: Ref<ComponentRef<typeof TextInput>>;
+  // Kartu dipakai pemanggil sebagai target gulir saat input difokuskan.
+  cardRef?: Ref<ViewInstance>;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
 export function AmountInput({
@@ -106,9 +110,13 @@ export function AmountInput({
   helper,
   accessibilityLabel,
   inputRef,
+  cardRef,
+  onFocus,
+  onBlur,
 }: AmountInputProps) {
   return (
     <View
+      ref={cardRef}
       className={`${CARD} ${
         error ? CARD_BORDER_ERROR : CARD_BORDER_NORMAL
       }`}
@@ -123,6 +131,8 @@ export function AmountInput({
           className="h-10 w-full p-0 text-center font-sans text-[28px] font-bold leading-9 text-[#121c2a]"
           value={value}
           onChangeText={onChangeText}
+          onFocus={onFocus}
+          onBlur={onBlur}
           keyboardType="number-pad"
           placeholder="0"
           placeholderTextColor="#c4c6ce"

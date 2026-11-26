@@ -19,6 +19,9 @@ interface BudgetEditCategoryPanelProps {
   amountError?: string;
   amountHelper: string;
   amountInputRef?: Ref<ComponentRef<typeof TextInput>>;
+  amountCardRef?: Ref<ViewInstance>;
+  onAmountFocus?: () => void;
+  onAmountBlur?: () => void;
   threshold: number;
   thresholdError?: string;
   thresholdRef?: Ref<ViewInstance>;
@@ -31,7 +34,7 @@ interface BudgetEditCategoryPanelProps {
   onRequestDelete: () => void;
 }
 
-// Tampilan edit satu alokasi: kategori dikunci, nominal dan ambang dapat diubah,
+// Tampilan edit satu alokasi: kategori dikunci, nominal dan batas peringatan dapat diubah,
 // dan penghapusan rincian berada di halaman ini agar tidak tercampur di ringkasan.
 export function BudgetEditCategoryPanel({
   budget,
@@ -44,6 +47,9 @@ export function BudgetEditCategoryPanel({
   amountError,
   amountHelper,
   amountInputRef,
+  amountCardRef,
+  onAmountFocus,
+  onAmountBlur,
   threshold,
   thresholdError,
   thresholdRef,
@@ -77,7 +83,10 @@ export function BudgetEditCategoryPanel({
         amountError={amountError}
         amountHelper={amountHelper}
         amountInputRef={amountInputRef}
+        amountCardRef={amountCardRef}
         onAmountChange={onAmountChange}
+        onAmountFocus={onAmountFocus}
+        onAmountBlur={onAmountBlur}
         onAddAmountPreset={onAddAmountPreset}
         threshold={threshold}
         thresholdError={thresholdError}

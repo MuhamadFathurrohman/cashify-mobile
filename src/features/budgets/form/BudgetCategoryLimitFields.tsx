@@ -8,7 +8,10 @@ interface BudgetCategoryLimitFieldsProps {
   amountError?: string;
   amountHelper: string;
   amountInputRef?: Ref<ComponentRef<typeof TextInput>>;
+  amountCardRef?: Ref<ViewInstance>;
   onAmountChange: (text: string) => void;
+  onAmountFocus?: () => void;
+  onAmountBlur?: () => void;
   onAddAmountPreset: (amount: number) => void;
   threshold: number;
   thresholdError?: string;
@@ -25,7 +28,10 @@ export function BudgetCategoryLimitFields({
   amountError,
   amountHelper,
   amountInputRef,
+  amountCardRef,
   onAmountChange,
+  onAmountFocus,
+  onAmountBlur,
   onAddAmountPreset,
   threshold,
   thresholdError,
@@ -44,6 +50,9 @@ export function BudgetCategoryLimitFields({
           helper={amountHelper}
           accessibilityLabel="Batas pengeluaran kategori"
           inputRef={amountInputRef}
+          cardRef={amountCardRef}
+          onFocus={onAmountFocus}
+          onBlur={onAmountBlur}
         />
         <PresetChips presets={CATEGORY_PRESETS} onAdd={onAddAmountPreset} />
       </View>

@@ -39,6 +39,7 @@ import {
   totalAllocated,
   validateCategoryStep,
   validateTotalStep,
+  type BudgetErrorField,
   type BudgetFormErrors,
 } from "./budgetFormRules";
 
@@ -47,7 +48,7 @@ export type BudgetFormStep = "total" | "category";
 export interface BudgetFormProps {
   // "create" = belum ada anggaran bulan ini (2 langkah: total → kategori);
   // "add" = menambah anggaran per kategori pada anggaran yang sudah ada;
-  // "edit" = mengubah nominal/ambang satu alokasi yang sudah ada.
+  // "edit" = mengubah nominal/batas peringatan satu alokasi yang sudah ada.
   mode: "create" | "add" | "edit";
   budget: BudgetDetail | null;
   // Hanya dipakai mode "edit": kategori yang sedang diubah.
@@ -120,8 +121,18 @@ export function BudgetForm({
   // Ref field untuk memfokuskan input atau menggulir ke kartu pertama yang error.
   const totalInputRef = useRef<ComponentRef<typeof TextInput>>(null);
   const amountInputRef = useRef<ComponentRef<typeof TextInput>>(null);
+  // Kartu (bukan hanya input) menjadi target gulir agar label dan helper ikut terlihat.
+  const totalCardRef = useRef<ViewInstance>(null);
+  const amountCardRef = useRef<ViewInstance>(null);
   const categoryCardRef = useRef<ViewInstance>(null);
   const thresholdCardRef = useRef<ViewInstance>(null);
+  // Ref fokus dipakai handler layout: keyboard memadatkan ScrollView setelah fokus,
+  // jadi posisi target perlu dihitung ulang saat layout berubah.
+  const totalFocusedRef = useRef(false);
+  const amountFocusedRef = useRef(false);
+  // Menandai target fokus dari validasi agar onFocus tidak menjalankan scroll
+  // manual kedua kalinya.
+  const validationFocusRef = useRef<BudgetErrorField | null>(null);
 
   // Hanya aksi simpan yang menampilkan spinner di footer. Saat menghapus,
   // footer ikut nonaktif tetapi spinner hanya muncul di dialog konfirmasi.
@@ -156,27 +167,103 @@ export function BudgetForm({
         };
 
   const scrollTop = () => {
+    totalFocusedRef.current = false;
+    amountFocusedRef.current = false;
+    validationFocusRef.current = null;
     scrollRef.current?.scrollTo({ y: 0, animated: false });
+  };
+
+  // Kartu nominal berada di dalam pembungkus, jadi measure() biasa mengembalikan
+  // koordinat terhadap pembungkus (mendekati 0). measureLayout terhadap isi
+  // ScrollView memberi koordinat konten yang benar.
+  const scrollFieldIntoView = (field: BudgetErrorField, offset = 12) => {
+    const scroll = scrollRef.current;
+    // measureLayout di arsitektur baru membutuhkan ref native, bukan node handle
+    // dari getInnerViewNode(). getInnerViewRef() mengembalikan ref inner ScrollView.
+    const inner = scroll?.getInnerViewRef();
+    if (!scroll || inner == null) return;
+
+    const card =
+      field === "total"
+        ? totalCardRef.current
+        : field === "amount"
+          ? amountCardRef.current
+          : field === "category"
+            ? categoryCardRef.current
+            : thresholdCardRef.current;
+    if (!card) return;
+
+    card.measureLayout(
+      inner,
+      (_x, y) => {
+        scroll.scrollTo({
+          y: Math.max(0, y - offset),
+          animated: true,
+        });
+      },
+      () => {
+        // Kartu bisa sudah dilepas saat layout berubah; tidak ada yang perlu dilakukan.
+      },
+    );
+  };
+
+  const scrollFocusedInputIntoView = () => {
+    if (validationFocusRef.current) {
+      scrollFieldIntoView(validationFocusRef.current, 16);
+      return;
+    }
+    if (amountFocusedRef.current) {
+      scrollFieldIntoView("amount");
+    } else if (totalFocusedRef.current) {
+      scrollFieldIntoView("total");
+    }
+  };
+
+  const focusTotalInput = () => {
+    totalFocusedRef.current = true;
+    // Fokus dari validasi sudah digulir oleh focusFirstError.
+    if (validationFocusRef.current === "total") return;
+    validationFocusRef.current = null;
+    setTimeout(scrollFocusedInputIntoView, 50);
+  };
+
+  const blurTotalInput = () => {
+    totalFocusedRef.current = false;
+    if (validationFocusRef.current === "total") {
+      validationFocusRef.current = null;
+    }
+  };
+
+  const focusAmountInput = () => {
+    amountFocusedRef.current = true;
+    if (validationFocusRef.current === "amount") return;
+    validationFocusRef.current = null;
+    setTimeout(scrollFocusedInputIntoView, 50);
+  };
+
+  const blurAmountInput = () => {
+    amountFocusedRef.current = false;
+    if (validationFocusRef.current === "amount") {
+      validationFocusRef.current = null;
+    }
   };
 
   const focusFirstError = (nextErrors: BudgetFormErrors) => {
     const field = firstBudgetErrorField(nextErrors);
     if (!field) return;
 
+    validationFocusRef.current = field;
+
     if (field === "total") {
       totalInputRef.current?.focus();
-      return;
-    }
-    if (field === "amount") {
+    } else if (field === "amount") {
       amountInputRef.current?.focus();
-      return;
     }
 
-    const target =
-      field === "category" ? categoryCardRef.current : thresholdCardRef.current;
-    target?.measure((_x, y) => {
-      scrollRef.current?.scrollTo({ y: Math.max(0, y - 80), animated: true });
-    });
+    // Input teks membuka keyboard; scroll diulang lewat onLayout ketika layout
+    // sudah memadat. Kategori/batas peringatan tidak punya input teks, jadi
+    // cukup digulir ke kartunya.
+    setTimeout(() => scrollFieldIntoView(field, 16), 50);
   };
 
   // Terapkan error dan fokus/gulir setelah render, sama seperti Transaction Form.
@@ -185,10 +272,13 @@ export function BudgetForm({
     setAttempted(true);
     if (hasBudgetFormError(nextErrors)) {
       setTimeout(() => focusFirstError(nextErrors), 50);
+    } else {
+      validationFocusRef.current = null;
     }
   };
 
   const changeTotal = (text: string) => {
+    validationFocusRef.current = null;
     const next = formatInputAmount(text);
     if (parseRawAmount(next) > MAX_AMOUNT) {
       setErrors((prev) => ({
@@ -202,6 +292,7 @@ export function BudgetForm({
   };
 
   const changeAmount = (text: string) => {
+    validationFocusRef.current = null;
     const next = formatInputAmount(text);
     if (parseRawAmount(next) > MAX_AMOUNT) {
       setErrors((prev) => ({
@@ -216,18 +307,21 @@ export function BudgetForm({
 
   // Chip menambah nilai yang sedang diisi, sama seperti layar Saldo Awal.
   const addTotalPreset = (increment: number) => {
+    validationFocusRef.current = null;
     const next = Math.min(total + increment, MAX_AMOUNT);
     setErrors((prev) => withoutError(prev, "total"));
     setTotalText(formatInputAmount(String(next)));
   };
 
   const addAmountPreset = (increment: number) => {
+    validationFocusRef.current = null;
     const next = Math.min(amount + increment, MAX_AMOUNT);
     setErrors((prev) => withoutError(prev, "amount"));
     setAmountText(formatInputAmount(String(next)));
   };
 
   const changeThreshold = (value: number) => {
+    validationFocusRef.current = null;
     setErrors((prev) => withoutError(prev, "threshold"));
     setThreshold(value);
   };
@@ -408,6 +502,8 @@ export function BudgetForm({
         scrollRef={scrollRef}
         className="bg-[#f8f9ff]"
         contentContainerClassName="gap-4 px-5 pb-6 pt-2"
+        onLayout={scrollFocusedInputIntoView}
+        onContentSizeChange={scrollFocusedInputIntoView}
         footer={
           <View
             className="border-t border-[rgba(196,198,206,0.3)] bg-[rgba(255,255,255,0.95)] px-5 pt-[21px]"
@@ -453,7 +549,10 @@ export function BudgetForm({
             error={errors.total}
             allocated={allocated}
             totalInputRef={totalInputRef}
+            totalCardRef={totalCardRef}
             onChangeText={changeTotal}
+            onTotalFocus={focusTotalInput}
+            onTotalBlur={blurTotalInput}
             onAddPreset={addTotalPreset}
           />
         ) : showEditStep && budget && editCategory ? (
@@ -470,6 +569,9 @@ export function BudgetForm({
               Math.max(total - otherAllocated, 0),
             )} untuk kategori ini.`}
             amountInputRef={amountInputRef}
+            amountCardRef={amountCardRef}
+            onAmountFocus={focusAmountInput}
+            onAmountBlur={blurAmountInput}
             threshold={threshold}
             thresholdError={errors.threshold}
             thresholdRef={thresholdCardRef}
@@ -487,7 +589,10 @@ export function BudgetForm({
             error={errors.total}
             allocated={allocated}
             totalInputRef={totalInputRef}
+            totalCardRef={totalCardRef}
             onChangeText={changeTotal}
+            onTotalFocus={focusTotalInput}
+            onTotalBlur={blurTotalInput}
             onAddPreset={addTotalPreset}
           />
         ) : showCategoryStep ? (
@@ -505,13 +610,17 @@ export function BudgetForm({
             total={total}
             summaryRows={summaryRows}
             amountInputRef={amountInputRef}
+            amountCardRef={amountCardRef}
             categoryRef={categoryCardRef}
             thresholdRef={thresholdCardRef}
             onSelectCategory={(id) => {
+              validationFocusRef.current = null;
               setErrors((prev) => withoutError(prev, "category"));
               setCategoryId(id);
             }}
             onAmountChange={changeAmount}
+            onAmountFocus={focusAmountInput}
+            onAmountBlur={blurAmountInput}
             onAddAmountPreset={addAmountPreset}
             onThresholdChange={changeThreshold}
             onEditTotal={mode === "create" ? backToTotal : openTotalEditor}

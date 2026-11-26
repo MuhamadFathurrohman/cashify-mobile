@@ -1,7 +1,7 @@
 import { formatPlainRupiah } from "@/utils/money";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import type { ComponentRef, Ref } from "react";
-import { Text, TextInput, View } from "react-native";
+import { Text, TextInput, View, type ViewInstance } from "react-native";
 import { AmountInput, PresetChips } from "./BudgetFormFields";
 import { BudgetStepIndicator } from "./BudgetFormSummary";
 import { TOTAL_PRESETS } from "./budgetFormRules";
@@ -13,7 +13,10 @@ interface BudgetTotalPanelProps {
   error?: string;
   allocated: number;
   totalInputRef?: Ref<ComponentRef<typeof TextInput>>;
+  totalCardRef?: Ref<ViewInstance>;
   onChangeText: (text: string) => void;
+  onTotalFocus?: () => void;
+  onTotalBlur?: () => void;
   onAddPreset: (amount: number) => void;
 }
 
@@ -25,7 +28,10 @@ export function BudgetTotalPanel({
   error,
   allocated,
   totalInputRef,
+  totalCardRef,
   onChangeText,
+  onTotalFocus,
+  onTotalBlur,
   onAddPreset,
 }: BudgetTotalPanelProps) {
   return (
@@ -50,6 +56,9 @@ export function BudgetTotalPanel({
         helper="Batas seluruh pengeluaran bulan ini."
         accessibilityLabel="Total anggaran bulanan"
         inputRef={totalInputRef}
+        cardRef={totalCardRef}
+        onFocus={onTotalFocus}
+        onBlur={onTotalBlur}
       />
       <PresetChips presets={TOTAL_PRESETS} onAdd={onAddPreset} />
 
