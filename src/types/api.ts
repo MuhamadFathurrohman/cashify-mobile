@@ -277,3 +277,85 @@ export interface TransactionListParams {
 
 // GET /transactions — menggunakan PaginatedResponse<Transaction> yang sudah ada
 export type TransactionListResponse = PaginatedResponse<Transaction>;
+
+// ─── Budgets (source: cashify-be, budgets.schema.ts) ─────────────────────────
+// Periode dinormalkan server: monthly selalu tanggal 1, weekly selalu Senin.
+export type BudgetPeriodType = "monthly" | "weekly";
+// Ambang total selalu 80%: ok < ambang, warning ambang..100, over > 100.
+export type BudgetStatus = "ok" | "warning" | "over";
+
+export interface BudgetCategory {
+    category_id: string;
+    name: string;
+    slug: string;
+    amount: number;
+    /** Persen 1–100; peringatan WhatsApp dikirim saat pemakaian melewati nilai ini. */
+    alert_threshold: number;
+}
+
+// Hanya ada pada detail: daftar budget (GET /budgets) tidak memuat progres.
+export interface BudgetCategoryProgress extends BudgetCategory {
+    spent: number;
+    /** amount - spent; bisa negatif saat anggaran terlampaui. */
+    remaining: number;
+    /** Satu desimal; bisa melewati 100. */
+    percent: number;
+    status: BudgetStatus;
+}
+
+export interface Budget {
+    id: string;
+    name: string | null;
+    period_type: BudgetPeriodType;
+    /** YYYY-MM-DD */
+    period_start: string;
+    /** YYYY-MM-DD, inklusif */
+    period_end: string;
+    total_amount: number;
+    auto_renew: boolean;
+    rollover_enabled: boolean;
+    created_at: string;
+    categories: BudgetCategory[];
+}
+
+export interface BudgetDetail
+    extends Omit<Budget, "categories"> {
+    categories: BudgetCategoryProgress[];
+    /** Seluruh pengeluaran periode, termasuk kategori yang tidak dialokasikan. */
+    spent_total: number;
+    /** total_amount - spent_total; bisa negatif. */
+    remaining_total: number;
+    percent_total: number;
+    status_total: BudgetStatus;
+}
+
+export interface BudgetListResponse {
+    data: Budget[];
+}
+
+export interface BudgetCategoryInput {
+    category_id: string;
+    amount: number;
+    alert_threshold: number;
+}
+
+// POST /budgets — `categories` minimal satu, tanpa duplikat, Σ amount ≤ total_amount.
+// Periode yang beririsan dengan anggaran lain ditolak 409 { field: "period_start", issue: "overlap" }.
+export interface CreateBudgetRequest {
+    name?: string;
+    period_type: BudgetPeriodType;
+    period_start: string;
+    total_amount: number;
+    auto_renew: boolean;
+    rollover_enabled: boolean;
+    categories: BudgetCategoryInput[];
+}
+
+// PATCH /budgets/{id} — `categories` bersifat replace (bukan tambah sebagian).
+export interface UpdateBudgetRequest {
+    name?: string;
+    total_amount?: number;
+    auto_renew?: boolean;
+    rollover_enabled?: boolean;
+    categories?: BudgetCategoryInput[];
+}

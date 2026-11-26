@@ -67,6 +67,7 @@ function RootLayoutNav() {
       <Stack.Protected guard={status === "ready"} redirectTo={redirectTo}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="transaction" />
+        <Stack.Screen name="budget" />
       </Stack.Protected>
 
       <Stack.Protected guard={status === "signedOut"} redirectTo={redirectTo}>
