@@ -1,4 +1,3 @@
-import { ComingSoon } from "@/components/ui/ComingSoon";
 import { MonthPicker } from "@/components/ui/MonthPicker";
 import { NotificationButton } from "@/components/ui/NotificationButton";
 import {
@@ -7,8 +6,16 @@ import {
 } from "@/components/ui/SegmentedControl";
 import { BudgetSection } from "@/features/budgets/BudgetSection";
 import { useBudgetMonthSelection } from "@/features/budgets/useBudgetMonthSelection";
+import {
+  PERIOD_MONTHS,
+  ReportSection,
+  type ReportPeriod,
+} from "@/features/reports/ReportSection";
 import { currentMonth, formatMonthLabel } from "@/utils/jakartaDates";
-import { toRecentMonthOptions } from "@/utils/monthOptions";
+import {
+  monthRangeLabel,
+  toRecentMonthOptions,
+} from "@/utils/monthOptions";
 import { useMemo, useState } from "react";
 import { Image, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,22 +29,15 @@ const TABS: readonly SegmentOption<AnalysisTab>[] = [
   { value: "report", label: "Laporan", icon: "bar-chart-outline" },
 ];
 
-// Laporan belum punya endpoint di backend, jadi segmennya masih placeholder.
-const REPORT_COPY = {
-  icon: "bar-chart-outline",
-  title: "Laporan",
-  description: "Laporan keuangan segera hadir.",
-} as const;
-
 // Shell tab Analisis: header + pemilih segmen + pemilih bulan. Isi segmen tinggal
-// di features/ supaya file ini tidak menjadi tempat logika anggaran.
+// di features/ supaya file ini tidak menjadi tempat logika anggaran atau laporan.
 export default function AnalysisScreen() {
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<AnalysisTab>("budget");
   const budgetMonth = useBudgetMonthSelection();
-  // Pilihan bulan laporan berdiri sendiri; belum dipakai request karena isi
-  // segmennya masih placeholder.
+  // Pilihan bulan dan periode laporan berdiri sendiri dari bulan Anggaran.
   const [reportMonth, setReportMonth] = useState(currentMonth);
+  const [reportPeriod, setReportPeriod] = useState<ReportPeriod>("1");
   const reportMonths = useMemo(() => toRecentMonthOptions(12), []);
 
   // Tombol bulan menampilkan bulan + tahun saja; tanggal lengkap ada di sheet.
@@ -53,6 +53,8 @@ export default function AnalysisScreen() {
           fallbackLabel:
             budgetMonth.selected?.monthLabel ??
             formatMonthLabel(currentMonth()),
+          displayLabel: undefined,
+          helperText: undefined,
         }
       : {
           months: reportMonths,
@@ -60,6 +62,14 @@ export default function AnalysisScreen() {
           onSelect: setReportMonth,
           disabled: false,
           fallbackLabel: undefined,
+          displayLabel:
+            reportPeriod === "1"
+              ? undefined
+              : monthRangeLabel(reportMonth, PERIOD_MONTHS[reportPeriod]),
+          helperText:
+            reportPeriod === "1"
+              ? undefined
+              : `Bulan dipilih sebagai akhir periode ${PERIOD_MONTHS[reportPeriod]} bulan.`,
         };
 
   return (
@@ -83,7 +93,9 @@ export default function AnalysisScreen() {
                 Analisis Keuangan
               </Text>
               <View className="mt-1">
-                <MonthPicker {...monthPicker} />
+                {/* Reset state sheet saat berpindah segmen: state Anggaran dan
+                    Laporan sengaja dipisah. MonthPicker tidak menyimpan pilihan. */}
+                <MonthPicker key={tab} {...monthPicker} />
               </View>
             </View>
           </View>
@@ -98,10 +110,10 @@ export default function AnalysisScreen() {
       {tab === "budget" ? (
         <BudgetSection selection={budgetMonth} />
       ) : (
-        <ComingSoon
-          icon={REPORT_COPY.icon}
-          title={REPORT_COPY.title}
-          description={REPORT_COPY.description}
+        <ReportSection
+          month={reportMonth}
+          period={reportPeriod}
+          onPeriodChange={setReportPeriod}
         />
       )}
     </View>

@@ -1,4 +1,5 @@
 import { dashboardKeys } from "@/features/dashboard/useDashboard";
+import { reportKeys } from "@/features/reports/reportQueries";
 import { apiClient } from "@/lib/api/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { transactionKeys } from "../transactionKeys";
@@ -22,6 +23,7 @@ export function useDeleteTransaction() {
         // membuatnya basi sehingga pemuatan berikutnya mengambil data terbaru.
         onSettled: () => {
             void queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+            void queryClient.invalidateQueries({ queryKey: reportKeys.all });
             void queryClient.invalidateQueries({ queryKey: transactionKeys.all });
         },
     });

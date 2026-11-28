@@ -62,6 +62,20 @@ export function formatMonthLabel(month: string): string {
     return `${MONTHS_LONG[m - 1]} ${year}`;
 }
 
+// Label sumbu grafik: "2026-11" -> "Nov". Format tidak valid dikembalikan apa adanya.
+export function formatMonthShort(month: string): string {
+    const [, m] = month.split("-").map(Number);
+    if (!m || m < 1 || m > 12) return month;
+    return MONTHS_SHORT[m - 1];
+}
+
+// Label rentang ringkas: "2026-11" -> "Nov 2026".
+export function formatMonthShortWithYear(month: string): string {
+    const [year, m] = month.split("-").map(Number);
+    if (!year || !m || m < 1 || m > 12) return month;
+    return `${MONTHS_SHORT[m - 1]} ${year}`;
+}
+
 // Jumlah hari pada bulan "YYYY-MM"; NaN bila format tidak valid
 export function daysInMonth(month: string): number {
     const [year, m] = month.split("-").map(Number);

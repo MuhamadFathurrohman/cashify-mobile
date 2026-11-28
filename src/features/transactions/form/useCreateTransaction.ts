@@ -1,4 +1,5 @@
 import { dashboardKeys } from "@/features/dashboard/useDashboard";
+import { reportKeys } from "@/features/reports/reportQueries";
 import { apiClient } from "@/lib/api/client";
 import type { CreateTransactionRequest, Transaction } from "@/types/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -18,8 +19,9 @@ export function useCreateTransaction() {
         retry: 0,
         onSuccess: () => {
             // Sengaja tanpa return/await: mutasi selesai segera sehingga layar bisa
-            // ditutup, sementara Beranda menyegarkan diri di latar belakang.
+            // ditutup, sementara Beranda dan Laporan menyegarkan diri di latar belakang.
             void queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+            void queryClient.invalidateQueries({ queryKey: reportKeys.all });
             void queryClient.invalidateQueries({ queryKey: transactionKeys.all });
         },
     });

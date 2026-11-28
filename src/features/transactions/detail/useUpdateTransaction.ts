@@ -1,4 +1,5 @@
 import { dashboardKeys } from "@/features/dashboard/useDashboard";
+import { reportKeys } from "@/features/reports/reportQueries";
 import { apiClient } from "@/lib/api/client";
 import type {
     Transaction,
@@ -37,8 +38,9 @@ export function useUpdateTransaction() {
                 (old) => (old ? { ...old, ...transaction } : old),
             );
             // Sengaja tanpa return/await: layar boleh ditutup segera, sementara
-            // riwayat dan Beranda menyegarkan diri di latar belakang.
+            // riwayat, Beranda, dan Laporan menyegarkan diri di latar belakang.
             void queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
+            void queryClient.invalidateQueries({ queryKey: reportKeys.all });
             void queryClient.invalidateQueries({ queryKey: transactionKeys.all });
         },
     });

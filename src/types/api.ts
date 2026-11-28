@@ -359,3 +359,34 @@ export interface UpdateBudgetRequest {
     rollover_enabled?: boolean;
     categories?: BudgetCategoryInput[];
 }
+
+// ─── Reports (source: cashify-be, reports.schema.ts) ─────────────────────────
+// Respons GET /reports/monthly dikirim tanpa envelope. `by_category` sudah
+// terurut total menurun dan `percent` dihitung terhadap total tipe yang sama.
+export interface ReportCategory {
+    category_id: string;
+    name: string;
+    slug: string;
+    type: TransactionType;
+    total: number;
+    percent: number;
+}
+
+// Setiap tanggal dalam bulan selalu ada; hari tanpa transaksi bernilai 0.
+export interface ReportDaily {
+    /** YYYY-MM-DD */
+    date: string;
+    income: number;
+    expense: number;
+}
+
+export interface MonthlyReport {
+    /** YYYY-MM */
+    month: string;
+    income_total: number;
+    expense_total: number;
+    /** income_total - expense_total; bisa negatif. */
+    net: number;
+    by_category: ReportCategory[];
+    daily: ReportDaily[];
+}

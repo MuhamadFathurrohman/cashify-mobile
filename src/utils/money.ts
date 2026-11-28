@@ -36,3 +36,25 @@ export function formatSigned(amount: number): string {
     if (amount === 0) return "Rp 0";
     return `${amount > 0 ? "+" : "-"}Rp ${digits(amount)}`;
 }
+
+// Label sumbu grafik: ringkas agar tidak menabrak area plot. "M" = miliar.
+function compactDigits(amount: number, divisor: number): string {
+    const scaled = amount / divisor;
+    const rounded = scaled >= 10 ? Math.round(scaled) : Math.round(scaled * 10) / 10;
+    return rounded.toLocaleString("id-ID", { maximumFractionDigits: 1 });
+}
+
+export function formatCompactRupiah(amount: number): string {
+    const absolute = Math.abs(amount);
+    const sign = amount < 0 ? "-" : "";
+    if (absolute >= 1_000_000_000) {
+        return `${sign}Rp ${compactDigits(absolute, 1_000_000_000)} M`;
+    }
+    if (absolute >= 1_000_000) {
+        return `${sign}Rp ${compactDigits(absolute, 1_000_000)} jt`;
+    }
+    if (absolute >= 1_000) {
+        return `${sign}Rp ${compactDigits(absolute, 1_000)} rb`;
+    }
+    return `${sign}Rp ${digits(amount)}`;
+}

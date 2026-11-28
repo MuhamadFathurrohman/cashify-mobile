@@ -23,6 +23,7 @@ interface MonthPickerSheetProps {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onClose: () => void;
+  helperText?: string;
 }
 
 const OPEN_DURATION = 260;
@@ -41,6 +42,7 @@ function SheetBody({
   onSelect,
   sheetHeight,
   requestClose,
+  helperText,
 }: SheetBodyProps) {
   const insets = useSafeAreaInsets();
 
@@ -72,6 +74,12 @@ function SheetBody({
           <Ionicons name="close" size={20} color="#43474d" />
         </Pressable>
       </View>
+
+      {helperText ? (
+        <Text className="font-sans mx-5 pb-2 text-xs leading-4 text-[#74777e]">
+          {helperText}
+        </Text>
+      ) : null}
 
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 8 }}
@@ -135,6 +143,7 @@ export function MonthPickerSheet({
   selectedId,
   onSelect,
   onClose,
+  helperText,
 }: MonthPickerSheetProps) {
   const [progress] = useState(() => new Animated.Value(1));
   const { height: windowHeight } = useWindowDimensions();
@@ -212,6 +221,7 @@ export function MonthPickerSheet({
                   onClose={onClose}
                   sheetHeight={sheetHeight}
                   requestClose={requestClose}
+                  helperText={helperText}
                 />
               </Animated.View>
             </>

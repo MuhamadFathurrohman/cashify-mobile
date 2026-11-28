@@ -12,6 +12,11 @@ interface MonthPickerProps {
   // posisi SegmentedControl di bawahnya tidak bergeser.
   disabled?: boolean;
   fallbackLabel?: string;
+  // Dipakai Laporan saat tab 6/12 Bulan: "Mei-Nov 2026". Tanpa ini tombol
+  // menampilkan nama bulan penuh seperti pada Anggaran.
+  displayLabel?: string;
+  // Penjelasan di dalam sheet bahwa bulan dipilih sebagai akhir periode.
+  helperText?: string;
 }
 
 // Tombol bulan + tahun pada header tab Analisis. Tanggal lengkap hanya muncul
@@ -22,10 +27,12 @@ export function MonthPicker({
   onSelect,
   disabled = false,
   fallbackLabel,
+  displayLabel,
+  helperText,
 }: MonthPickerProps) {
   const [sheetVisible, setSheetVisible] = useState(false);
   const selected = months.find((month) => month.id === selectedId) ?? null;
-  const label = selected?.monthLabel ?? fallbackLabel ?? "Pilih bulan";
+  const label = displayLabel ?? selected?.monthLabel ?? fallbackLabel ?? "Pilih bulan";
   const canOpen = !disabled && months.length > 0;
 
   return (
@@ -58,6 +65,7 @@ export function MonthPicker({
           selectedId={selectedId}
           onSelect={onSelect}
           onClose={() => setSheetVisible(false)}
+          helperText={helperText}
         />
       ) : null}
     </>
